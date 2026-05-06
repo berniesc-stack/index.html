@@ -1,0 +1,2716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiniela Mundial FIFA 2026</title>
+<!-- Firebase SDK (debe cargar ANTES del script principal) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#dde4ef;--bg2:#d4dceb;--surface:#ccd5e4;--card:#f0f4fa;--card2:#e4ecf5;
+  --border:#b8c8dc;--border2:#a8bacf;--text:#1a2540;--muted:#4a6080;--faint:#7a90a8;
+  --gold:#b07800;--gold2:#c89000;--red:#c02030;--green:#157040;--cyan:#1060b0;
+  --cyan2:#1878c8;--purple:#5030b8;--purple2:#7858d8;
+  --shadow:0 2px 10px rgba(0,0,0,0.12);--shadow2:0 4px 20px rgba(0,0,0,0.18);
+  --grad:linear-gradient(135deg,#c02030,#b07800,#157040,#1060b0);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);font-family:'Barlow',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;
+  background-image:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(16,96,176,0.06),transparent);
+}
+
+/* ── HERO ─────────────────────────────────────── */
+.hero{text-align:center;padding:2.8rem 1rem 2rem;position:relative;overflow:hidden;background:linear-gradient(180deg,#c8d5e8 0%,#d0daea 70%,var(--bg) 100%)}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(212,168,0,0.5),transparent)}
+.hero-trophy{font-size:3.5rem;display:block;margin-bottom:0.5rem;filter:drop-shadow(0 0 18px rgba(212,168,0,0.8));animation:tPulse 3s ease-in-out infinite}
+@keyframes tPulse{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.07) rotate(2deg)}}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,7vw,4.5rem);letter-spacing:5px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.05;margin-bottom:0.3rem}
+.hero-sub{font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;color:rgba(200,214,248,0.45);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem}
+
+/* ── TABS ─────────────────────────────────────── */
+.tabs-wrap{position:sticky;top:0;z-index:100;background:rgba(221,228,239,0.97);border-bottom:1px solid var(--border);padding:0 0.5rem;box-shadow:var(--shadow);backdrop-filter:blur(12px)}
+.tabs{display:flex;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:0.7rem 0.9rem;background:none;border:none;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;letter-spacing:1.2px;transition:all 0.2s;text-transform:uppercase}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab:hover:not(.active){color:var(--text)}
+.panel{display:none;padding:1rem;max-width:1380px;margin:0 auto}
+.panel.active{display:block}
+
+/* ── BUTTONS ──────────────────────────────────── */
+.btn{padding:0.42rem 0.9rem;border-radius:7px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:0.77rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.15)}
+.btn-cyan{background:var(--cyan);color:#fff;box-shadow:var(--shadow)}
+.btn-green{background:var(--green);color:#fff;box-shadow:var(--shadow)}
+.btn-gold{background:var(--gold2);color:#fff;box-shadow:var(--shadow)}
+.btn-dark{background:var(--card2);color:var(--text);border:1px solid var(--border2)}
+.btn-red{background:var(--red);color:#fff;box-shadow:var(--shadow)}
+.btn-purple{background:var(--purple);color:#fff;box-shadow:var(--shadow)}
+.action-bar{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem}
+
+/* ── INPUTS ──────────────────────────────────── */
+.inp{width:100%;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:0.55rem 0.8rem;font-size:0.88rem;font-family:'Barlow',sans-serif;transition:border-color 0.2s;outline:none}
+.inp:focus{border-color:var(--gold)}
+.inp::placeholder{color:var(--muted)}
+label.lbl{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;color:var(--cyan2);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:0.35rem}
+
+/* ── REGISTRATION SCREEN ──────────────────────── */
+#regScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 100%)}
+.reg-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;max-width:460px;width:100%;box-shadow:var(--shadow2);animation:fadeUp 0.5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.reg-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;color:var(--gold2);text-align:center;margin-bottom:0.3rem}
+.reg-sub{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;color:var(--muted);text-align:center;letter-spacing:2px;text-transform:uppercase;margin-bottom:1.8rem}
+.form-row{margin-bottom:1rem}
+.reg-terms{font-size:0.72rem;color:var(--muted);text-align:center;margin-top:1rem;line-height:1.5}
+.reg-err{color:var(--red);font-size:0.72rem;margin-top:0.4rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:none}
+
+/* ── WELCOME ──────────────────────────────────── */
+#appScreen{display:none}
+.welcome-banner{background:linear-gradient(135deg,rgba(20,160,80,0.1),rgba(24,120,200,0.1));border:1px solid rgba(20,160,80,0.3);border-radius:10px;padding:0.8rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;gap:10px;font-size:0.83rem}
+.welcome-name{color:var(--gold2);font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:1rem}
+
+/* ── SCORE INPUT ──────────────────────────────── */
+.sinp{width:50px;height:44px;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:2px 4px;font-size:1.1rem;font-weight:800;text-align:center;font-family:'Barlow Condensed',sans-serif;transition:border-color 0.15s;outline:none}
+.sinp:focus{border-color:var(--gold);background:rgba(212,168,0,0.05)}
+.sinp::placeholder{color:var(--faint)}
+.ssep{color:var(--faint);font-weight:700;font-size:0.85rem}
+.score-wrap{display:flex;align-items:center;gap:3px;flex-shrink:0}
+
+/* ── GROUP CARD ───────────────────────────────── */
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.85rem}
+.group-card{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden;box-shadow:var(--shadow)}
+.group-header{padding:0.52rem 0.85rem;font-family:'Bebas Neue',sans-serif;font-size:0.98rem;letter-spacing:3px;display:flex;align-items:center;gap:7px;color:#fff}
+.gh-A{background:linear-gradient(135deg,#123620,#0a2215)}.gh-B{background:linear-gradient(135deg,#321010,#200a0a)}
+.gh-C{background:linear-gradient(135deg,#0e3218,#083010)}.gh-D{background:linear-gradient(135deg,#081840,#04102a)}
+.gh-E{background:linear-gradient(135deg,#303005,#201e03)}.gh-F{background:linear-gradient(135deg,#381805,#240e03)}
+.gh-G{background:linear-gradient(135deg,#202020,#121212)}.gh-H{background:linear-gradient(135deg,#360a18,#240610)}
+.gh-I{background:linear-gradient(135deg,#050c40,#030828)}.gh-J{background:linear-gradient(135deg,#0e2038,#081428)}
+.gh-K{background:linear-gradient(135deg,#052808,#032005)}.gh-L{background:linear-gradient(135deg,#060e38,#040a28)}
+.group-body{padding:0.6rem 0.85rem}
+.matches-wrap{margin-top:0.45rem}
+.jornada-label{font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:4px 0 2px;border-top:1px solid var(--border);margin-top:3px}
+.match-score-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:4px;padding:5px 2px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.match-score-row:last-child{border-bottom:none}
+.msr-team{display:flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:600;min-width:0}
+.msr-team.msr-home{justify-content:flex-end;text-align:right}
+.msr-team.msr-away{justify-content:flex-start}
+.msr-flag{font-size:0.9rem;flex-shrink:0}
+.msr-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:85px;font-size:0.7rem}
+
+/* ── SPECIAL PICKS ────────────────────────────── */
+.special-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.special-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.pts-badge{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:20px;letter-spacing:1px}
+.pts-10{background:rgba(212,168,0,0.2);color:var(--gold2);border:1px solid rgba(212,168,0,0.4)}
+.pts-5{background:rgba(24,120,200,0.2);color:var(--cyan2);border:1px solid rgba(24,120,200,0.4)}
+.special-sel{width:100%;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:0.52rem 0.8rem;font-size:0.88rem;font-family:'Barlow',sans-serif;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;transition:border-color 0.2s}
+.special-sel:focus{border-color:var(--gold)}
+
+/* ── LEADERBOARD ──────────────────────────────── */
+.leaderboard-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem;box-shadow:var(--shadow)}
+.lb-header{padding:0.8rem 1.2rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:3px;background:linear-gradient(135deg,#ded8f0,#d0ccec);color:var(--purple);display:flex;align-items:center;justify-content:space-between}
+.lb-table{width:100%;border-collapse:collapse;font-size:0.78rem}
+.lb-table th{padding:0.5rem 1rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);text-align:left}
+.lb-table th:last-child,.lb-table td:last-child{text-align:right}
+.lb-table td{padding:0.6rem 1rem;border-bottom:1px solid rgba(0,0,0,0.04)}
+.lb-table tr:last-child td{border-bottom:none}
+.lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--muted)}
+.lb-rank.r1{color:var(--gold2)}.lb-rank.r2{color:#c0c8d8}.lb-rank.r3{color:#c08040}
+.lb-name{font-weight:700;font-size:0.85rem}
+.lb-pts{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold)}
+.lb-detail{font-size:0.68rem;color:var(--muted);margin-top:1px}
+tr.lb-me td{background:rgba(212,168,0,0.06)}
+
+/* ── ADMIN PANEL ──────────────────────────────── */
+.admin-login-wrap{display:flex;align-items:center;justify-content:center;padding:3rem 1rem}
+.admin-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;max-width:400px;width:100%;box-shadow:var(--shadow2)}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--cyan2);margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem}
+.result-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border)}
+.result-row:last-child{border-bottom:none}
+.rr-team{font-size:0.8rem;font-weight:600}
+.rr-team.home{text-align:right}.rr-team.away{text-align:left}
+.rinp{width:46px;height:40px;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;text-align:center;font-size:1rem;font-weight:800;font-family:'Barlow Condensed',sans-serif;outline:none;transition:border-color 0.15s}
+.rinp:focus{border-color:var(--green)}
+.rsep{color:var(--faint);font-weight:700}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.85rem}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+.result-card-hd{padding:0.45rem 0.85rem;font-family:'Bebas Neue',sans-serif;font-size:0.88rem;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:6px}
+.result-card-body{padding:0.5rem 0.85rem}
+.pts-summary{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem}
+.pts-chip{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.8px}
+.chip-3{background:rgba(20,160,80,0.15);color:var(--green);border:1px solid rgba(20,160,80,0.3)}
+.chip-5{background:rgba(24,120,200,0.15);color:var(--cyan2);border:1px solid rgba(24,120,200,0.3)}
+.chip-exact{background:rgba(212,168,0,0.15);color:var(--gold2);border:1px solid rgba(212,168,0,0.3)}
+
+/* ── COMPARISON TABLE ──────────────────────────── */
+.compare-wrap{overflow-x:auto;margin-bottom:1.5rem}
+.compare-tbl{width:100%;border-collapse:collapse;font-size:0.72rem;min-width:700px}
+.compare-tbl th{padding:0.45rem 0.6rem;background:var(--card2);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:700;text-align:center;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+.compare-tbl th:first-child{text-align:left;min-width:120px}
+.compare-tbl td{padding:0.4rem 0.5rem;border-bottom:1px solid rgba(0,0,0,0.04);text-align:center;border-right:1px solid rgba(0,0,0,0.03)}
+.compare-tbl td:first-child{text-align:left;font-weight:700;font-size:0.75rem}
+.compare-tbl tr:nth-child(odd) td{background:rgba(0,0,0,0.015)}
+.cell-exact{background:rgba(212,168,0,0.15)!important;color:var(--gold2);font-weight:800}
+.cell-correct{background:rgba(20,160,80,0.1)!important;color:var(--green);font-weight:700}
+.cell-wrong{color:var(--muted)}
+.cell-missing{color:var(--faint)}
+.match-label{font-size:0.62rem;color:var(--muted)}
+.real-score{font-weight:800;font-size:0.85rem;color:var(--gold2)}
+
+/* ── TOAST ────────────────────────────────────── */
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(21,112,64,0.35);color:var(--green);padding:0.45rem 1.2rem;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.5px;z-index:9999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── MODAL ────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(20,37,64,0.45);z-index:900;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(6px)}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.8rem;max-width:500px;width:100%;box-shadow:var(--shadow2);animation:fadeUp 0.25s ease}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--gold);margin-bottom:1.2rem}
+.modal-actions{display:flex;gap:0.5rem;margin-top:1.2rem}
+
+/* ── SCORING LEGEND ───────────────────────────── */
+.scoring-legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.6rem;margin-bottom:1.5rem}
+.sc-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.9rem;display:flex;align-items:center;gap:10px}
+.sc-pts{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;line-height:1}
+.sc-pts.p3{color:var(--green)}.sc-pts.p5{color:var(--cyan2)}.sc-pts.p10{color:var(--gold2)}
+.sc-desc{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.5px;line-height:1.3}
+
+/* ── SAVE STATUS ──────────────────────────────── */
+.save-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--green);margin-right:4px;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* ── PARTICIPANT ROW ──────────────────────────── */
+.participant-row{display:flex;align-items:center;justify-content:space-between;padding:0.55rem 0.85rem;border-bottom:1px solid var(--border);font-size:0.8rem}
+.participant-row:last-child{border-bottom:none}
+.p-name{font-weight:700}
+.p-email{color:var(--muted);font-size:0.72rem}
+
+/* ── EXPORT SECTION ──────────────────────────── */
+.export-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.export-title{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.8rem}
+
+/* ── PROGRESS BAR ──────────────────────────────── */
+.prog-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:0.4rem}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--gold));border-radius:2px;transition:width 0.5s ease}
+
+/* ── ADMIN TABS ─────────────────────────────────── */
+.admin-tab-panel{display:none}
+.admin-tab-panel.active-tab{display:block}
+
+/* ── RESPONSIVE ────────────────────────────────── */
+@media(max-width:600px){
+  .groups-grid{grid-template-columns:1fr}
+  .results-grid{grid-template-columns:1fr}
+  .scoring-legend{grid-template-columns:1fr 1fr}
+  h1{font-size:2.2rem}
+  .name-row{grid-template-columns:1fr!important}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PARTICIPANTE -->
+<div id="regScreen">
+  <div class="reg-card">
+    <span style="font-size:2.8rem;display:block;text-align:center;margin-bottom:0.5rem;filter:drop-shadow(0 0 12px rgba(212,168,0,0.7))">🏆</span>
+    <div class="reg-title">QUINIELA</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:4px;color:var(--cyan2);text-align:center;margin-bottom:0.2rem">MUNDIAL FIFA 2026</div>
+    <div class="reg-sub">Ingresa con tu correo y PIN</div>
+
+    <div style="background:rgba(24,120,200,0.08);border:1px solid rgba(24,120,200,0.2);border-radius:8px;padding:0.65rem 1rem;margin-bottom:1.2rem;font-size:0.75rem;color:var(--cyan2);line-height:1.6">
+      🔑 El administrador te asignó un código de acceso de 4 dígitos. Ingrésalo junto con tu correo para entrar.
+    </div>
+
+    <div class="form-row">
+      <label class="lbl">Correo electrónico</label>
+      <input class="inp" id="rCorreo" type="email" placeholder="correo@ejemplo.com" autocomplete="email" onkeydown="if(event.key==='Enter') document.getElementById('rPin').focus()">
+    </div>
+    <div class="form-row">
+      <label class="lbl">Código de acceso</label>
+      <div style="display:flex;align-items:center;gap:0;border:1px solid var(--border2);border-radius:8px;overflow:hidden;background:var(--card)">
+        <span style="padding:0.55rem 0.7rem;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;letter-spacing:1px;color:var(--gold2);background:rgba(176,120,0,0.1);border-right:1px solid var(--border2);white-space:nowrap">QM26-</span>
+        <input id="rPin" type="text" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off" style="flex:1;background:transparent;border:none;outline:none;padding:0.55rem 0.7rem;font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:4px;color:var(--text);width:100%" onkeydown="if(event.key==='Enter') loginParticipante()">
+      </div>
+    </div>
+    <div id="regErr" class="reg-err">⚠ Correo o código incorrecto.</div>
+
+    <button class="btn btn-gold" style="width:100%;justify-content:center;padding:0.75rem;font-size:0.95rem;margin-top:0.5rem" onclick="loginParticipante()">
+      ⚽ INGRESAR →
+    </button>
+
+    <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;text-align:center">
+      <button class="btn btn-dark" style="font-size:0.68rem" onclick="showAdminLogin()">🔧 Acceso Administrador</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="appScreen">
+  <div class="hero">
+    <span class="hero-trophy">🏆</span>
+    <h1>QUINIELA MUNDIAL 2026</h1>
+    <div class="hero-sub">USA · CANADÁ · MÉXICO — 48 EQUIPOS · 104 PARTIDOS</div>
+    <div id="welcomeBanner" class="welcome-banner" style="max-width:560px;margin:0 auto;margin-top:1rem">
+      <span>👋</span>
+      <div>
+        <div style="font-size:0.7rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase">Bienvenido</div>
+        <div class="welcome-name" id="welcomeName">—</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:0.6rem">
+        <div style="text-align:right">
+          <div style="font-size:0.6rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase">Tu código</div>
+          <div id="welcomeCodigo" style="font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:800;letter-spacing:2px;color:var(--gold2)">—</div>
+        </div>
+        <span style="font-size:0.72rem;color:var(--muted)"><span class="save-dot"></span>Auto-guardado</span>
+        <button class="btn btn-dark" style="font-size:0.65rem;padding:0.3rem 0.7rem;border-color:rgba(204,40,64,0.4);color:var(--red)" onclick="cerrarSesion()">🚪 Salir</button>
+      </div>
+    </div>
+    <div id="deadlineBanner" style="display:none;max-width:560px;margin:0 auto;margin-top:0.5rem;border-radius:8px;padding:0.6rem 1rem;font-size:0.78rem;border:1px solid;line-height:1.5"></div>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('pronosticos')">⚽ Mis Pronósticos</button>
+      <button class="tab" onclick="showTab('especiales')">🏆 Picks Especiales</button>
+      <button class="tab" onclick="showTab('mipuntaje')">🎯 Mi Puntaje</button>
+      <button class="tab" onclick="showTab('tabla')">🥇 Tabla en Vivo</button>
+      <button class="tab" onclick="showTab('grupos')">📊 Grupos</button>
+      <button class="tab" onclick="showTab('comparar')">📊 Comparar</button>
+      <button class="tab" onclick="showTab('otrospronosticos')">👁 Ver Pronósticos</button>
+      <button class="tab" onclick="showTab('puntaje')">📋 Puntos</button>
+    </div>
+  </div>
+
+  <!-- PRONÓSTICOS -->
+  <div id="tab-pronosticos" class="panel active">
+    <div class="action-bar">
+      <button class="btn btn-green" onclick="guardarPronosticos()">💾 Guardar Pronósticos</button>
+      <button class="btn btn-cyan" onclick="showTab('especiales')">Siguiente: Picks Especiales →</button>
+    </div>
+    <div style="background:rgba(24,120,200,0.08);border:1px solid rgba(24,120,200,0.2);border-radius:8px;padding:0.6rem 1rem;margin-bottom:1rem;font-size:0.78rem;color:var(--cyan2)">
+      📝 Ingresa el marcador que crees que terminará cada partido. <strong>3 pts</strong> por ganador correcto · <strong>5 pts</strong> por marcador exacto
+    </div>
+    <div class="groups-grid" id="gruposContainer"></div>
+  </div>
+
+  <!-- PICKS ESPECIALES -->
+  <div id="tab-especiales" class="panel">
+    <div class="action-bar">
+      <button class="btn btn-green" onclick="guardarEspeciales()">💾 Guardar Picks</button>
+      <button class="btn btn-dark" onclick="showTab('pronosticos')">← Pronósticos</button>
+    </div>
+
+    <!-- SISTEMA DE PUNTOS -->
+    <div class="scoring-legend">
+      <div class="sc-item"><div class="sc-pts p3">3</div><div class="sc-desc">Puntos por<br>resultado correcto</div></div>
+      <div class="sc-item"><div class="sc-pts p5">5</div><div class="sc-desc">Puntos por<br>marcador exacto</div></div>
+      <div class="sc-item"><div class="sc-pts p10">10</div><div class="sc-desc">Puntos por<br>acertar el Campeón</div></div>
+      <div class="sc-item"><div class="sc-pts p5">5</div><div class="sc-desc">Puntos por<br>acertar el Subcampeón</div></div>
+      <div class="sc-item"><div class="sc-pts p10">10</div><div class="sc-desc">Puntos por<br>Máximo Goleador</div></div>
+    </div>
+
+    <div class="special-card">
+      <div class="special-title">🏆 Campeón del Mundial <span class="pts-badge pts-10">10 PTS</span></div>
+      <label class="lbl">¿Qué selección ganará la Copa del Mundo?</label>
+      <select class="special-sel" id="pickCampeon"><option value="">— Selecciona el Campeón —</option></select>
+    </div>
+
+    <div class="special-card">
+      <div class="special-title">🥈 Subcampeón <span class="pts-badge pts-5">5 PTS</span></div>
+      <label class="lbl">¿Qué selección llegará a la final pero no ganará?</label>
+      <select class="special-sel" id="pickSubcampeon"><option value="">— Selecciona el Subcampeón —</option></select>
+    </div>
+
+    <div class="special-card">
+      <div class="special-title">⚽ Máximo Goleador <span class="pts-badge pts-10">10 PTS</span></div>
+      <label class="lbl">¿Quién será el Bota de Oro del torneo?</label>
+      <input class="inp" id="pickGoleador" type="text" placeholder="Nombre del jugador" style="margin-bottom:0.6rem">
+      <div style="font-size:0.72rem;color:var(--muted)">💡 Candidatos: Mbappé, Haaland, Messi, Vinicius Jr., Lewandowski, Kane, Osimhen…</div>
+    </div>
+
+    <button class="btn btn-gold" style="width:100%;justify-content:center;padding:0.8rem;font-size:0.9rem" onclick="guardarEspeciales()">
+      💾 GUARDAR TODOS MIS PICKS
+    </button>
+  </div>
+
+  <!-- MI PUNTAJE -->
+  <div id="tab-mipuntaje" class="panel">
+    <div class="action-bar">
+      <button class="btn btn-cyan" onclick="buildMiPuntaje()">🔄 Actualizar</button>
+    </div>
+    <div id="miPuntajeContainer">
+      <div style="padding:2rem;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:0.85rem">
+        Cargando tu puntaje…
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA EN VIVO -->
+  <div id="tab-tabla" class="panel">
+    <div class="action-bar">
+      <button class="btn btn-cyan" onclick="calcularTabla()">🔄 Actualizar Tabla</button>
+      <button class="btn btn-dark" onclick="exportarCSV()">⬇ Exportar CSV</button>
+    </div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:6px">
+      <span class="save-dot"></span> Tabla actualizada automáticamente cuando el administrador cargue resultados reales
+    </div>
+    <div class="leaderboard-card">
+      <div class="lb-header">
+        <span>🥇 TABLA DE POSICIONES</span>
+        <span id="totalParticipantes" style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;color:var(--muted)">0 participantes</span>
+      </div>
+      <div id="leaderboardBody">
+        <div style="padding:2rem;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:0.85rem">
+          La tabla aparecerá cuando el administrador registre resultados reales.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRUPOS (standings) -->
+  <div id="tab-grupos" class="panel">
+    <div class="action-bar">
+      <button class="btn btn-cyan" onclick="buildGruposStandings('gruposStandingsContainer')">🔄 Actualizar</button>
+    </div>
+    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem">Posiciones calculadas con los resultados reales ingresados por el administrador, usando los criterios de desempate oficiales de la FIFA.</div>
+    <div id="gruposStandingsContainer"></div>
+  </div>
+
+  <!-- VER PRONÓSTICOS DE OTROS -->
+  <div id="tab-otrospronosticos" class="panel">
+    <div class="action-bar">
+      <select class="special-sel" id="otrosPronSelector" style="max-width:260px" onchange="buildOtrosPron()">
+        <option value="">— Selecciona un participante —</option>
+      </select>
+      <button class="btn btn-cyan" onclick="buildOtrosPron()">🔄 Ver</button>
+    </div>
+    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem">Consulta los pronósticos de cualquier participante.</div>
+    <div id="otrosPronContainer"></div>
+  </div>
+
+  <!-- COMPARACIÓN -->
+  <div id="tab-comparar" class="panel">
+    <div class="action-bar">
+      <button class="btn btn-cyan" onclick="buildComparacion()">🔄 Actualizar</button>
+    </div>
+    <div style="background:rgba(24,120,200,0.08);border:1px solid rgba(24,120,200,0.18);border-radius:9px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.78rem;line-height:1.7">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--cyan2);letter-spacing:1px;margin-bottom:0.3rem">ℹ️ ¿CÓMO FUNCIONAN LOS RESULTADOS REALES?</div>
+      <span style="color:var(--text)">Los resultados reales los ingresa el <strong style="color:var(--gold2)">Administrador</strong> partido a partido conforme avanza el Mundial. En cuanto el admin guarda un resultado, la comparación y los puntos se actualizan automáticamente para todos los participantes. Tú no necesitas hacer nada — solo revisar aquí tu puntaje.</span>
+    </div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem">
+      <span style="color:var(--gold2)">Dorado</span> = marcador exacto (5pts) · <span style="color:var(--green)">Verde</span> = resultado correcto (3pts) · Gris = incorrecto
+    </div>
+    <div id="comparacionContainer"></div>
+  </div>
+
+  <!-- SISTEMA DE PUNTOS -->
+  <div id="tab-puntaje" class="panel">
+    <div class="scoring-legend" style="margin-bottom:1.5rem">
+      <div class="sc-item"><div class="sc-pts p3">3</div><div class="sc-desc">Resultado correcto<br>(ganador o empate)</div></div>
+      <div class="sc-item"><div class="sc-pts p5">5</div><div class="sc-desc">Marcador exacto<br>(goles correctos)</div></div>
+      <div class="sc-item"><div class="sc-pts p10">10</div><div class="sc-desc">Campeón correcto<br>(pick especial)</div></div>
+      <div class="sc-item"><div class="sc-pts p5">5</div><div class="sc-desc">Subcampeón correcto<br>(pick especial)</div></div>
+      <div class="sc-item"><div class="sc-pts p10">10</div><div class="sc-desc">Máximo goleador<br>(pick especial)</div></div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem">
+      <div class="section-title">📋 Reglas del Juego</div>
+      <div style="font-size:0.85rem;line-height:1.9;color:var(--text)">
+        <p><span style="color:var(--gold2);font-weight:700">🎯 Resultado correcto (3 pts):</span> Predices correctamente quién gana o si hay empate, aunque no aciertes el marcador exacto.</p>
+        <p><span style="color:var(--gold2);font-weight:700">🎯 Marcador exacto (5 pts):</span> Aciertas los goles exactos de ambos equipos. Incluye automáticamente los 3 pts de resultado correcto.</p>
+        <p><span style="color:var(--gold2);font-weight:700">🏆 Campeón (10 pts):</span> Si tu selección escogida gana el Mundial, sumas 10 puntos al final del torneo.</p>
+        <p><span style="color:var(--gold2);font-weight:700">🥈 Subcampeón (5 pts):</span> Si tu selección llega a la final pero pierde, sumas 5 puntos.</p>
+        <p><span style="color:var(--gold2);font-weight:700">⚽ Goleador (10 pts):</span> Si el jugador que escribiste es el máximo anotador del torneo, sumas 10 puntos.</p>
+        <p style="margin-top:1rem;padding:0.8rem;background:rgba(212,168,0,0.06);border-radius:8px;border-left:3px solid var(--gold);color:var(--muted)"><strong style="color:var(--gold2)">Nota:</strong> El marcador exacto otorga 5 pts totales (no se suman los 3 de resultado correcto por separado). El máximo posible por partido es 5 pts.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VERIFICAR PIN -->
+<div class="modal-overlay" id="pinVerifyModal">
+  <div class="modal-box">
+    <div class="modal-title">🔒 Verificar Identidad</div>
+    <p style="font-size:0.83rem;color:var(--text);margin-bottom:0.4rem">Ya existe una cuenta con ese correo.</p>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6">Ingresa tu PIN de 4 dígitos para acceder a tus pronósticos guardados.</p>
+    <div class="form-row">
+      <label class="lbl">Tu PIN de seguridad</label>
+      <input class="inp" id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" style="letter-spacing:8px;font-size:1.5rem;text-align:center" onkeydown="if(event.key==='Enter') verifyPin()">
+    </div>
+    <div id="pinErr" style="color:var(--red);font-size:0.72rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:none;margin-top:0.3rem">⚠ PIN incorrecto. Intentos restantes: <span id="pinAttemptsLeft">3</span></div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" onclick="verifyPin()">Verificar →</button>
+      <button class="btn btn-dark" onclick="closeModal('pinVerifyModal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CERRAR SESIÓN -->
+<div class="modal-overlay" id="cerrarSesionModal">
+  <div class="modal-box">
+    <div class="modal-title">🚪 Cerrar Sesión</div>
+    <p style="font-size:0.85rem;color:var(--text);margin-bottom:0.5rem">¿Seguro que quieres salir?</p>
+    <p style="font-size:0.78rem;color:var(--muted);line-height:1.6">Tus pronósticos están guardados automáticamente. Cuando vuelvas a ingresar con el mismo correo, todo se restaurará exactamente donde lo dejaste.</p>
+    <div class="modal-actions">
+      <button class="btn btn-red" onclick="confirmarCerrarSesion()">🚪 Sí, cerrar sesión</button>
+      <button class="btn btn-dark" onclick="closeModal('cerrarSesionModal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGREGAR/EDITAR PARTICIPANTE (ADMIN) -->
+<div class="modal-overlay" id="adminPartModal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-title" id="adminPartModalTitle">➕ Agregar Participante</div>
+    <input type="hidden" id="adminPartId">
+    <div class="form-row">
+      <label class="lbl">Nombre completo</label>
+      <input class="inp" id="adminPartNombre" type="text" placeholder="Nombre y apellido">
+    </div>
+    <div class="form-row">
+      <label class="lbl">Correo electrónico</label>
+      <input class="inp" id="adminPartCorreo" type="email" placeholder="correo@ejemplo.com">
+    </div>
+    <div class="form-row">
+      <label class="lbl">Número de celular</label>
+      <input class="inp" id="adminPartCelular" type="tel" placeholder="+1 555 000 0000">
+    </div>
+    <div class="form-row">
+      <label class="lbl">Código de acceso</label>
+      <div style="background:rgba(176,120,0,0.08);border:1px solid rgba(176,120,0,0.2);border-radius:8px;padding:0.55rem 0.8rem;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:3px;color:var(--gold2)" id="adminPartCodigoDisplay">—</div>
+      <div style="font-size:0.67rem;color:var(--muted);margin-top:0.3rem">Generado automáticamente. El participante lo usará con su correo para ingresar. <button onclick="regenerarCodigo()" style="background:none;border:none;color:var(--cyan2);cursor:pointer;font-size:0.67rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:0;text-decoration:underline">🔄 Regenerar</button></div>
+      <input type="hidden" id="adminPartPin">
+    </div>
+    <div class="form-row">
+      <label class="lbl">Monto de suscripción pagado</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
+        <input class="inp" id="adminPartMonto" type="number" min="0" step="0.01" placeholder="0.00">
+        <input class="inp" id="adminPartFechaPago" type="date">
+      </div>
+      <div style="font-size:0.67rem;color:var(--muted);margin-top:0.3rem">Dejar en 0 si aún no pagó.</div>
+    </div>
+    <div id="adminPartErr" style="color:var(--red);font-size:0.72rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:none;margin-top:0.3rem"></div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" onclick="guardarParticipanteAdmin()">💾 Guardar</button>
+      <button class="btn btn-dark" onclick="closeModal('adminPartModal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal-overlay" id="adminLoginModal">
+  <div class="modal-box">
+    <div class="modal-title">🔧 Acceso Administrador</div>
+    <div class="form-row">
+      <label class="lbl">Contraseña de Administrador</label>
+      <input class="inp" id="adminPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') verifyAdmin()">
+    </div>
+    <div id="adminErr" style="color:var(--red);font-size:0.72rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:none;margin-top:0.3rem">⚠ Contraseña incorrecta.</div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" onclick="verifyAdmin()">Ingresar →</button>
+      <button class="btn btn-dark" onclick="closeModal('adminLoginModal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL SCREEN -->
+<div id="adminScreen" style="display:none">
+  <div class="hero" style="padding:1.5rem 1rem">
+    <h1 style="font-size:2.5rem">PANEL ADMINISTRADOR</h1>
+    <div class="hero-sub">Control de resultados y tabla de posiciones</div>
+  </div>
+  <div style="max-width:1380px;margin:0 auto;padding:1rem">
+
+    <!-- BARRA PRINCIPAL -->
+    <div class="action-bar" style="margin-bottom:0.8rem">
+      <button class="btn btn-cyan" onclick="abrirModalAgregarPart()">➕ Participante</button>
+      <button class="btn btn-green" onclick="guardarResultadosReales()">💾 Guardar Resultados</button>
+      <button class="btn btn-gold" onclick="calcularTodosLosPuntos()">⚡ RECALCULAR PUNTOS</button>
+      <button class="btn btn-purple" onclick="exportarDatosAdmin()">⬇ CSV</button>
+      <button class="btn btn-red" style="margin-left:auto" onclick="if(confirm('¿Borrar TODOS los participantes y pronósticos? Esta acción es irreversible.')){resetTodoAdmin();}">🗑 Reset</button>
+      <button class="btn btn-dark" style="border-color:rgba(204,40,64,0.4);color:var(--red)" onclick="cerrarSesionAdmin()">🚪 Cerrar Sesión Admin</button>
+    </div>
+
+    <!-- TABS ADMIN -->
+    <div class="tabs-wrap" style="margin-bottom:1rem;position:static;border-radius:10px">
+      <div class="tabs">
+        <button class="tab active" onclick="showAdminTab('atab-participantes')">👥 PARTICIPANTES</button>
+        <button class="tab" onclick="showAdminTab('atab-pronosticos')">📋 PRONÓSTICOS</button>
+        <button class="tab" onclick="showAdminTab('atab-posiciones')">🥇 POSICIONES</button>
+        <button class="tab" onclick="showAdminTab('atab-grupos')">📊 GRUPOS</button>
+        <button class="tab" onclick="showAdminTab('atab-resultados')">⚽ RESULTADOS REALES</button>
+        <button class="tab" onclick="showAdminTab('atab-config')">⚙️ CONFIG</button>
+      </div>
+    </div>
+
+    <!-- TAB: PARTICIPANTES -->
+    <div id="atab-participantes" class="admin-tab-panel active-tab">
+      <div class="leaderboard-card" style="margin-bottom:1.5rem">
+        <div class="lb-header">
+          <span>👥 PARTICIPANTES REGISTRADOS</span>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <span id="adminPagoResumen" style="font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;color:var(--muted)"></span>
+            <span id="adminTotalPart" style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;color:var(--muted)">0 registrados</span>
+          </div>
+        </div>
+        <div id="adminParticipantsList"></div>
+      </div>
+    </div>
+
+    <!-- TAB: PRONÓSTICOS -->
+    <div id="atab-pronosticos" class="admin-tab-panel" style="display:none">
+      <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;flex-wrap:wrap">
+        <label class="lbl" style="margin:0">Ver pronósticos de:</label>
+        <select class="special-sel" id="adminPronSelector" style="max-width:280px;flex:1" onchange="buildAdminPronósticos()">
+          <option value="__todos__">📋 Todos los participantes (tabla)</option>
+        </select>
+        <button class="btn btn-cyan" onclick="buildAdminPronósticos()">🔄 Actualizar</button>
+        <button class="btn btn-green" onclick="guardarPronosticosAdmin()">💾 GUARDAR PRONÓSTICOS DEL PARTICIPANTE</button>
+      </div>
+      <div id="adminPronContainer"></div>
+    </div>
+
+    <!-- TAB: POSICIONES -->
+    <div id="atab-posiciones" class="admin-tab-panel" style="display:none">
+      <div style="background:rgba(120,80,216,0.08);border:1px solid rgba(120,80,216,0.25);border-radius:9px;padding:0.7rem 1rem;margin-bottom:1rem;font-size:0.78rem;color:var(--purple2);line-height:1.6">
+        🏅 <strong>Desempate:</strong> 1° Puntos totales · 2° Pronósticos exactos (5 pts) · 3° Pronósticos correctos (3 pts)
+      </div>
+      <div id="adminPosicionesContainer"></div>
+      <div style="margin-top:1.5rem">
+        <div class="section-title">📊 Tabla Comparativa por Partido</div>
+        <div class="compare-wrap" id="adminTablaComparativa"></div>
+      </div>
+    </div>
+
+    <!-- TAB: GRUPOS (standings FIFA) -->
+    <div id="atab-grupos" class="admin-tab-panel" style="display:none">
+      <div style="background:rgba(20,160,80,0.07);border:1px solid rgba(20,160,80,0.25);border-radius:9px;padding:0.7rem 1rem;margin-bottom:1rem;font-size:0.78rem;color:var(--text);line-height:1.6">
+        📐 <strong style="color:var(--green)">Criterios de desempate FIFA:</strong> 1° Puntos · 2° Diferencia de goles en grupo · 3° Goles a favor · 4° Puntos en partidos entre sí · 5° Diferencia de goles entre sí · 6° Goles a favor entre sí
+      </div>
+      <div id="adminGruposStandingsContainer"></div>
+    </div>
+
+    <!-- TAB: RESULTADOS -->
+    <div id="atab-resultados" class="admin-tab-panel" style="display:none">
+      <div style="background:rgba(20,160,80,0.07);border:1px solid rgba(20,160,80,0.25);border-radius:9px;padding:0.75rem 1rem;margin-bottom:0.8rem;font-size:0.78rem;line-height:1.7;color:var(--text)">
+        <strong style="color:var(--green)">📋 FLUJO DE RESULTADOS:</strong> Ingresa el marcador final de cada partido. Al escribir ambos goles el sistema recalcula automáticamente los puntos. Presiona <strong>💾 Guardar Resultados</strong> para confirmar.
+      </div>
+      <div class="results-grid" id="adminResultsContainer"></div>
+      <div class="special-card" style="margin-top:1.5rem">
+        <div class="special-title">🏆 Resultados Especiales (Finales del Torneo)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div>
+            <label class="lbl">Campeón Real <span class="pts-badge pts-10">10 PTS</span></label>
+            <select class="special-sel" id="realCampeon"><option value="">— Campeón —</option></select>
+          </div>
+          <div>
+            <label class="lbl">Subcampeón Real <span class="pts-badge pts-5">5 PTS</span></label>
+            <select class="special-sel" id="realSubcampeon"><option value="">— Subcampeón —</option></select>
+          </div>
+        </div>
+        <div>
+          <label class="lbl">Máximo Goleador Real <span class="pts-badge pts-10">10 PTS</span></label>
+          <input class="inp" id="realGoleador" type="text" placeholder="Nombre del jugador" style="max-width:350px">
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CONFIGURACIÓN -->
+    <div id="atab-config" class="admin-tab-panel" style="display:none">
+      <div class="special-card">
+        <div class="special-title">⏰ Fecha Límite de Pronósticos</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.8rem;line-height:1.6">Una vez vencida la fecha límite, los participantes ya no podrán editar sus pronósticos ni picks especiales.</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:0.6rem;align-items:flex-end;max-width:480px">
+          <div>
+            <label class="lbl">Fecha y hora límite</label>
+            <input class="inp" id="adminDeadline" type="datetime-local">
+          </div>
+          <button class="btn btn-gold" onclick="guardarDeadline()">💾 Guardar</button>
+        </div>
+        <div id="deadlineStatus" style="margin-top:0.6rem;font-size:0.75rem;color:var(--muted)"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   DATOS — Grupos y Partidos
+══════════════════════════════════════════════════ */
+const GROUPS={
+  A:{teams:[{f:'🇲🇽',n:'México'},{f:'🇿🇦',n:'Sudáfrica'},{f:'🇰🇷',n:'Corea del Sur'},{f:'🇨🇿',n:'Chequia'}]},
+  B:{teams:[{f:'🇨🇦',n:'Canadá'},{f:'🇧🇦',n:'Bosnia y Herz.'},{f:'🇶🇦',n:'Catar'},{f:'🇨🇭',n:'Suiza'}]},
+  C:{teams:[{f:'🇧🇷',n:'Brasil'},{f:'🇲🇦',n:'Marruecos'},{f:'🇭🇹',n:'Haití'},{f:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',n:'Escocia'}]},
+  D:{teams:[{f:'🇺🇸',n:'Estados Unidos'},{f:'🇵🇾',n:'Paraguay'},{f:'🇦🇺',n:'Australia'},{f:'🇹🇷',n:'Turquía'}]},
+  E:{teams:[{f:'🇩🇪',n:'Alemania'},{f:'🇨🇼',n:'Curazao'},{f:'🇨🇮',n:'Costa de Marfil'},{f:'🇪🇨',n:'Ecuador'}]},
+  F:{teams:[{f:'🇳🇱',n:'Países Bajos'},{f:'🇯🇵',n:'Japón'},{f:'🇸🇪',n:'Suecia'},{f:'🇹🇳',n:'Túnez'}]},
+  G:{teams:[{f:'🇧🇪',n:'Bélgica'},{f:'🇪🇬',n:'Egipto'},{f:'🇮🇷',n:'Irán'},{f:'🇳🇿',n:'Nueva Zelanda'}]},
+  H:{teams:[{f:'🇪🇸',n:'España'},{f:'🇨🇻',n:'Cabo Verde'},{f:'🇸🇦',n:'Arabia Saudita'},{f:'🇺🇾',n:'Uruguay'}]},
+  I:{teams:[{f:'🇫🇷',n:'Francia'},{f:'🇸🇳',n:'Senegal'},{f:'🇳🇴',n:'Noruega'},{f:'🇮🇶',n:'Irak'}]},
+  J:{teams:[{f:'🇦🇷',n:'Argentina'},{f:'🇩🇿',n:'Argelia'},{f:'🇦🇹',n:'Austria'},{f:'🇯🇴',n:'Jordania'}]},
+  K:{teams:[{f:'🇵🇹',n:'Portugal'},{f:'🇨🇩',n:'DR Congo'},{f:'🇺🇿',n:'Uzbekistán'},{f:'🇨🇴',n:'Colombia'}]},
+  L:{teams:[{f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',n:'Inglaterra'},{f:'🇭🇷',n:'Croacia'},{f:'🇬🇭',n:'Ghana'},{f:'🇵🇦',n:'Panamá'}]}
+};
+
+const GSCHED={
+  A:[[0,1,'M1','11 Jun'],[2,3,'M2','12 Jun'],[3,1,'M17','17 Jun'],[0,2,'M18','17 Jun'],[1,2,'M33','22 Jun'],[3,0,'M34','22 Jun']],
+  B:[[0,1,'M3','12 Jun'],[2,3,'M4','12 Jun'],[0,3,'M19','18 Jun'],[1,2,'M20','18 Jun'],[3,1,'M35','23 Jun'],[2,0,'M36','23 Jun']],
+  C:[[0,1,'M5','13 Jun'],[2,3,'M6','13 Jun'],[0,2,'M21','18 Jun'],[3,1,'M22','18 Jun'],[1,2,'M37','23 Jun'],[3,0,'M38','23 Jun']],
+  D:[[0,1,'M7','12 Jun'],[2,3,'M8','13 Jun'],[0,2,'M23','18 Jun'],[3,1,'M24','18 Jun'],[1,2,'M39','23 Jun'],[3,0,'M40','23 Jun']],
+  E:[[0,1,'M9','14 Jun'],[2,3,'M10','14 Jun'],[0,2,'M25','19 Jun'],[3,1,'M26','19 Jun'],[1,2,'M41','25 Jun'],[3,0,'M42','25 Jun']],
+  F:[[0,3,'M11','15 Jun'],[1,2,'M12','15 Jun'],[0,1,'M27','20 Jun'],[2,3,'M28','20 Jun'],[3,1,'M43','25 Jun'],[2,0,'M44','25 Jun']],
+  G:[[0,3,'M13','16 Jun'],[1,2,'M14','16 Jun'],[0,1,'M29','21 Jun'],[2,3,'M30','21 Jun'],[3,1,'M45','27 Jun'],[2,0,'M46','27 Jun']],
+  H:[[0,1,'M15','15 Jun'],[2,3,'M16','15 Jun'],[0,2,'M31','20 Jun'],[3,1,'M32','20 Jun'],[1,2,'M47','27 Jun'],[3,0,'M48','27 Jun']],
+  I:[[0,1,'M49','16 Jun'],[2,3,'M50','16 Jun'],[0,2,'M57','21 Jun'],[3,1,'M58','21 Jun'],[1,2,'M65','22 Jun'],[3,0,'M66','22 Jun']],
+  J:[[0,1,'M51','13 Jun'],[2,3,'M52','13 Jun'],[0,2,'M59','19 Jun'],[3,1,'M60','19 Jun'],[1,2,'M67','24 Jun'],[3,0,'M68','24 Jun']],
+  K:[[0,3,'M53','14 Jun'],[1,2,'M54','14 Jun'],[0,1,'M61','19 Jun'],[2,3,'M62','19 Jun'],[3,1,'M69','25 Jun'],[2,0,'M70','25 Jun']],
+  L:[[0,1,'M55','14 Jun'],[2,3,'M56','14 Jun'],[0,2,'M63','20 Jun'],[3,1,'M64','20 Jun'],[1,2,'M71','26 Jun'],[3,0,'M72','26 Jun']]
+};
+
+// Mapa partido → grupo y equipos
+const MATCH_MAP={};
+for(const g in GROUPS){
+  GSCHED[g].forEach(([hi,ai,mn,date])=>{
+    MATCH_MAP[mn]={g,hi,ai,date,
+      teamH:GROUPS[g].teams[hi],
+      teamA:GROUPS[g].teams[ai]
+    };
+  });
+}
+
+const ALL_TEAMS=[];
+for(const g in GROUPS) GROUPS[g].teams.forEach(t=>ALL_TEAMS.push(t));
+ALL_TEAMS.sort((a,b)=>a.n.localeCompare(b.n));
+
+/* ══════════════════════════════════════════════════
+   STORAGE
+══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   FIREBASE CONFIG
+══════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyC6Sryw2xsnYgyRY4dZMbobAZswqYVNoEM",
+  authDomain: "quiniela-mundial-2026-bapq.firebaseapp.com",
+  projectId: "quiniela-mundial-2026-bapq",
+  storageBucket: "quiniela-mundial-2026-bapq.firebasestorage.app",
+  messagingSenderId: "893722092215",
+  appId: "1:893722092215:web:9b6aad74698246a078a332"
+};
+
+// Firebase globals (cargados desde CDN)
+let db=null;
+let fbApp=null;
+let unsubListeners=[];
+
+function initFirebase(){
+  try{
+    // Evitar inicializar dos veces
+    if(firebase.apps.length>0){
+      fbApp=firebase.apps[0];
+    } else {
+      fbApp=firebase.initializeApp(firebaseConfig);
+    }
+    db=firebase.firestore();
+    db.settings({experimentalForceLongPolling:true,merge:true});
+    console.log('✅ Firebase conectado');
+  }catch(ex){
+    console.error('❌ Firebase error:',ex);
+    showToast('⚠ Error al conectar con Firebase. Verifica tu conexión.');
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   HELPERS FIREBASE
+══════════════════════════════════════════════════ */
+function handleFbError(ex, op){
+  if(ex&&ex.code==='permission-denied'){
+    showToast('🔒 Firebase: sin permisos. Actualiza las Reglas de Firestore a: allow read, write: if true');
+    console.error('FIRESTORE PERMISSION DENIED — actualiza las reglas en Firebase Console');
+  } else {
+    console.error('Firebase error ['+op+']:',ex);
+  }
+}
+
+async function fbGet(coleccion, doc){
+  try{
+    const snap=await db.collection(coleccion).doc(doc).get();
+    return snap.exists?snap.data():null;
+  }catch(ex){handleFbError(ex,'fbGet');return null;}
+}
+
+async function fbSet(coleccion, doc, data){
+  try{
+    await db.collection(coleccion).doc(doc).set(data,{merge:true});
+    return true;
+  }catch(ex){handleFbError(ex,'fbSet');return false;}
+}
+
+async function fbGetAll(coleccion){
+  try{
+    const snap=await db.collection(coleccion).get();
+    return snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(ex){handleFbError(ex,'fbGetAll');return [];}
+}
+
+async function fbDelete(coleccion, doc){
+  try{
+    await db.collection(coleccion).doc(doc).delete();
+    return true;
+  }catch(ex){handleFbError(ex,'fbDelete');return false;}
+}
+
+function fbListen(coleccion, doc, callback){
+  if(!db) return;
+  const unsub=db.collection(coleccion).doc(doc).onSnapshot(
+    snap=>{ callback(snap.exists?snap.data():null); },
+    ex=>{ handleFbError(ex,'fbListen:'+coleccion+'/'+doc); }
+  );
+  unsubListeners.push(unsub);
+  return unsub;
+}
+
+function fbListenAll(coleccion, callback){
+  if(!db) return;
+  const unsub=db.collection(coleccion).onSnapshot(
+    snap=>{ callback(snap.docs.map(d=>({id:d.id,...d.data()}))); },
+    ex=>{ handleFbError(ex,'fbListenAll:'+coleccion); }
+  );
+  unsubListeners.push(unsub);
+  return unsub;
+}
+
+function stopAllListeners(){
+  unsubListeners.forEach(u=>u&&u());
+  unsubListeners=[];
+}
+
+/* ══════════════════════════════════════════════════
+   COLECCIONES FIRESTORE
+   participants/{correo} → datos del participante
+   results/partidos     → {M1:{h,a}, M2:{h,a}...}
+   results/especiales   → {campeon,subcampeon,goleador}
+   config/general       → {deadline, ...}
+══════════════════════════════════════════════════ */
+
+// Cache local (para que la UI sea rápida)
+let FB_PARTICIPANTS={}; // correo → data
+let FB_RESULTS={};
+let FB_REAL_ESP={};
+let FB_CONFIG={};
+
+// localStorage solo para sesión activa del usuario
+const LS_USER='qm26_user';
+const LS_ADMIN_ATTEMPTS='qm26_admin_att';
+const ADMIN_PASSWORD='worldcup2026';
+const MAX_ADMIN_ATTEMPTS=5;
+const ADMIN_LOCKOUT_MS=15*60*1000;
+
+function isDeadlinePassed(){
+  try{
+    const dl=FB_CONFIG.deadline;
+    if(!dl) return false;
+    return new Date()>new Date(dl);
+  }catch(ex){return false;}
+}
+
+function getDeadlineStr(){
+  try{
+    const dl=FB_CONFIG.deadline;
+    if(!dl) return null;
+    return new Date(dl).toLocaleString('es-MX',{dateStyle:'full',timeStyle:'short'});
+  }catch(ex){return null;}
+}
+
+let pinPendingUser=null;
+let pinAttempts=0;
+let currentUser=null;
+let pronosticos={};
+let especiales={campeon:'',subcampeon:'',goleador:''};
+
+/* ══════════════════════════════════════════════════
+   INIT — arranca listeners en tiempo real
+══════════════════════════════════════════════════ */
+async function init(){
+  initFirebase();
+  if(!db){
+    showErrorOverlay('No se pudo inicializar Firebase. Recarga la página.');
+    return;
+  }
+  showLoadingOverlay('Conectando con Firebase…');
+
+  // Test rápido de permisos antes de arrancar listeners
+  try{
+    await db.collection('config').doc('general').get();
+  }catch(ex){
+    hideLoadingOverlay();
+    if(ex&&ex.code==='permission-denied'){
+      showErrorOverlay(
+        '🔒 Firestore bloqueado por las Reglas de seguridad.\n\n'+
+        'Ve a Firebase Console → Firestore Database → Reglas\n'+
+        'y reemplaza todo el contenido con:\n\n'+
+        'rules_version = \'2\';\nservice cloud.firestore {\n'+
+        '  match /databases/{database}/documents {\n'+
+        '    match /{document=**} {\n'+
+        '      allow read, write: if true;\n'+
+        '    }\n  }\n}'
+      );
+    } else {
+      showErrorOverlay('Error de conexión con Firebase: '+ex.message);
+    }
+    return;
+  }
+
+  // Listener: participantes en tiempo real
+  fbListenAll('participants', docs=>{
+    FB_PARTICIPANTS={};
+    docs.forEach(d=>{ FB_PARTICIPANTS[d.correo||d.id]=d; });
+    if(currentUser){
+      const fresh=FB_PARTICIPANTS[currentUser.correo];
+      if(fresh){ pronosticos=fresh.pronosticos||{}; especiales=fresh.especiales||{campeon:'',subcampeon:'',goleador:''}; }
+    }
+    refreshActiveViews();
+  });
+
+  fbListen('results','partidos', data=>{ FB_RESULTS=data||{}; refreshActiveViews(); });
+  fbListen('results','especiales', data=>{ FB_REAL_ESP=data||{}; refreshActiveViews(); });
+  fbListen('config','general', data=>{
+    FB_CONFIG=data||{};
+    if(currentUser){ const b=document.getElementById('deadlineBanner'); if(b) updateDeadlineBannerEl(b); }
+    if(document.getElementById('deadlineStatus')) showDeadlineStatus();
+  });
+
+  // Esperar primer snapshot de participantes (máx 3s)
+  await new Promise(res=>{
+    const t=setTimeout(res,3000);
+    const check=setInterval(()=>{
+      if(Object.keys(FB_PARTICIPANTS).length>0||db===null){ clearInterval(check);clearTimeout(t);res(); }
+    },200);
+  });
+
+  // Restaurar sesión guardada
+  try{
+    const u=localStorage.getItem(LS_USER);
+    if(u){
+      const saved=JSON.parse(u);
+      const fresh=FB_PARTICIPANTS[saved.correo]||await fbGet('participants',saved.correo);
+      if(fresh){
+        currentUser={...saved,...fresh};
+        pronosticos=fresh.pronosticos||{};
+        especiales=fresh.especiales||{campeon:'',subcampeon:'',goleador:''};
+        hideLoadingOverlay();
+        populateSelects();
+        launchApp();
+        return;
+      } else {
+        localStorage.removeItem(LS_USER);
+      }
+    }
+  }catch(ex){console.warn('Session restore:',ex);}
+
+  hideLoadingOverlay();
+}
+
+function showErrorOverlay(msg){
+  hideLoadingOverlay();
+  let ov=document.getElementById('fbErrorOverlay');
+  if(ov) ov.remove();
+  ov=document.createElement('div');
+  ov.id='fbErrorOverlay';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(221,228,239,0.98);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:2rem;gap:1.2rem';
+  const pre=msg.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+  ov.innerHTML=`
+    <div style="font-size:2.5rem">🔒</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px;color:var(--red)">ACCESO BLOQUEADO</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;color:var(--muted);text-align:center;max-width:520px;line-height:1.7;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:1rem">${pre}</div>
+    <button onclick="location.reload()" style="margin-top:0.5rem;padding:0.6rem 1.5rem;background:var(--gold);color:#000;border:none;border-radius:7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;letter-spacing:1px">🔄 REINTENTAR</button>
+  `;
+  document.body.appendChild(ov);
+}
+
+function refreshActiveViews(){
+  if(!currentUser) return;
+  // Refrescar tabla si está visible
+  const tablaPanel=document.getElementById('tab-tabla');
+  if(tablaPanel&&tablaPanel.classList.contains('active')) calcularTabla();
+  const comparPanel=document.getElementById('tab-comparar');
+  if(comparPanel&&comparPanel.classList.contains('active')) buildComparacion();
+  const puntajePanel=document.getElementById('tab-mipuntaje');
+  if(puntajePanel&&puntajePanel.classList.contains('active')) buildMiPuntaje();
+  const gruposPanel=document.getElementById('tab-grupos');
+  if(gruposPanel&&gruposPanel.classList.contains('active')) buildGruposStandings('gruposStandingsContainer');
+  // Admin
+  const adminPos=document.getElementById('atab-posiciones');
+  if(adminPos&&adminPos.style.display==='block'){ buildAdminPosiciones(); buildAdminTablaComparativa(); }
+  const adminGrupos=document.getElementById('atab-grupos');
+  if(adminGrupos&&adminGrupos.style.display==='block') buildGruposStandings('adminGruposStandingsContainer');
+  const adminParts=document.getElementById('atab-participantes');
+  if(adminParts&&adminParts.style.display==='block') buildAdminParticipants();
+  const adminPron=document.getElementById('atab-pronosticos');
+  if(adminPron&&adminPron.style.display!=='none') buildAdminPronósticos();
+}
+
+function showLoadingOverlay(msg){
+  let ov=document.getElementById('fbLoadingOverlay');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='fbLoadingOverlay';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(221,228,239,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:1rem';
+    ov.innerHTML=`<div style="font-size:2rem">⚽</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--gold2)">${msg||'Cargando…'}</div><div style="width:40px;height:4px;background:var(--gold);border-radius:2px;animation:pulse 1s infinite alternate"></div>`;
+    document.body.appendChild(ov);
+  }
+}
+function hideLoadingOverlay(){
+  const ov=document.getElementById('fbLoadingOverlay');
+  if(ov) ov.remove();
+}
+
+// Firebase carga en <head> — llamar init directamente cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', ()=>{
+  populateSelects();
+  init();
+});
+
+function populateSelects(){
+  const opts=ALL_TEAMS.map(t=>`<option value="${t.n}">${t.f} ${t.n}</option>`).join('');
+  ['pickCampeon','pickSubcampeon','realCampeon','realSubcampeon'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const firstOpt=el.options[0]?el.options[0].outerHTML:'<option value="">— Selecciona —</option>';
+    el.innerHTML=firstOpt+opts;
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   REGISTRO
+══════════════════════════════════════════════════ */
+function generarCodigo(){
+  const digits=Math.floor(1000+Math.random()*9000); // siempre 4 dígitos
+  return 'QM26-'+digits;
+}
+
+function hashPin(pin){
+  // Mantener compatibilidad con PINs de 4 dígitos anteriores
+  let h=0;
+  for(let i=0;i<pin.length;i++) h=(h*31+pin.charCodeAt(i))&0xffffffff;
+  return 'p'+Math.abs(h).toString(16)+'x'+pin.length;
+}
+
+function hashCodigo(codigo){
+  // Hash del código QM26-XXXXXX (se guarda en pinHash para compatibilidad)
+  const c=codigo.toUpperCase().trim();
+  let h=0;
+  for(let i=0;i<c.length;i++) h=(h*31+c.charCodeAt(i))&0xffffffff;
+  return 'qm26_'+Math.abs(h).toString(16)+'_'+c.length;
+}
+
+/* ══════════════════════════════════════════════════
+   LOGIN PARTICIPANTE
+══════════════════════════════════════════════════ */
+async function loginParticipante(){
+  const correo=document.getElementById('rCorreo').value.trim().toLowerCase();
+  const digits=document.getElementById('rPin').value.trim();
+  const errEl=document.getElementById('regErr');
+
+  if(!correo||!digits){errEl.style.display='block';errEl.textContent='⚠ Ingresa tu correo y código de acceso.';return;}
+  if(!/^\d{4}$/.test(digits)){errEl.style.display='block';errEl.textContent='⚠ El código debe ser exactamente 4 dígitos numéricos.';return;}
+  const codigoRaw='QM26-'+digits;
+  errEl.style.display='none';
+
+  showLoadingOverlay('Verificando…');
+  try{
+    let found=FB_PARTICIPANTS[correo]||await fbGet('participants',correo);
+    hideLoadingOverlay();
+    if(!found){errEl.style.display='block';errEl.textContent='⚠ Correo no encontrado. Contacta al administrador.';return;}
+    if(found.pinHash!==hashCodigo(codigoRaw)){errEl.style.display='block';errEl.textContent='⚠ Código incorrecto. Verifica con el administrador.';return;}
+    currentUser=found;
+    pronosticos=found.pronosticos||{};
+    especiales=found.especiales||{campeon:'',subcampeon:'',goleador:''};
+    localStorage.setItem(LS_USER,JSON.stringify({correo:found.correo,nombre:found.nombre,fullName:found.fullName,codigoAcceso:found.codigoAcceso}));
+    document.getElementById('rPin').value='';
+    launchApp();
+    showToast('👋 ¡Bienvenido, '+currentUser.nombre+'!');
+  }catch(ex){
+    hideLoadingOverlay();
+    errEl.style.display='block';
+    errEl.textContent='⚠ Error al ingresar. Verifica tu conexión.';
+  }
+}
+
+function verifyPin(){
+  const pin=document.getElementById('pinInput').value.trim();
+  if(!pinPendingUser) return;
+
+  if(pinPendingUser.pinHash&&hashPin(pin)===pinPendingUser.pinHash){
+    // PIN correcto
+    currentUser=pinPendingUser;
+    const savedPron=pinPendingUser.pronosticos;
+    if(savedPron) pronosticos=savedPron;
+    const savedEsp=pinPendingUser.especiales;
+    if(savedEsp) especiales=savedEsp;
+    try{localStorage.setItem(LS_USER,JSON.stringify(currentUser));}catch(ex){}
+    pinPendingUser=null;
+    closeModal('pinVerifyModal');
+    launchApp();
+    showToast('👋 Bienvenido de vuelta, '+currentUser.nombre+'! Tus pronósticos se han restaurado.');
+  } else if(!pinPendingUser.pinHash){
+    // Cuenta antigua sin PIN — acceso directo (compatibilidad)
+    currentUser=pinPendingUser;
+    const savedPron=pinPendingUser.pronosticos;
+    if(savedPron) pronosticos=savedPron;
+    const savedEsp=pinPendingUser.especiales;
+    if(savedEsp) especiales=savedEsp;
+    try{localStorage.setItem(LS_USER,JSON.stringify(currentUser));}catch(ex){}
+    pinPendingUser=null;
+    closeModal('pinVerifyModal');
+    launchApp();
+    showToast('👋 Bienvenido de vuelta! (Cuenta sin PIN — considera re-registrarte para mayor seguridad)');
+  } else {
+    pinAttempts++;
+    const left=3-pinAttempts;
+    document.getElementById('pinErr').style.display='block';
+    document.getElementById('pinAttemptsLeft').textContent=left;
+    if(left<=0){
+      closeModal('pinVerifyModal');
+      pinPendingUser=null;
+      showToast('🔒 Demasiados intentos fallidos. Intenta de nuevo.');
+    }
+  }
+}
+
+async function saveParticipant(user){
+  const correo=user.correo;
+  if(!correo) return;
+  await fbSet('participants', correo, user);
+  FB_PARTICIPANTS[correo]={...user};
+}
+
+
+function updateDeadlineBannerEl(bannerEl){
+  const dlStr=getDeadlineStr();
+  const dlPassed=isDeadlinePassed();
+  if(!dlStr){bannerEl.style.display='none';return;}
+  bannerEl.style.display='block';
+  if(dlPassed){
+    bannerEl.innerHTML=`🔒 <strong>Fecha límite vencida</strong> — Los pronósticos están cerrados desde el ${dlStr}. Ya no puedes editar.`;
+    bannerEl.style.background='rgba(204,40,64,0.1)';
+    bannerEl.style.borderColor='rgba(204,40,64,0.3)';
+    bannerEl.style.color='var(--red)';
+  } else {
+    bannerEl.innerHTML=`⏰ <strong>Fecha límite:</strong> ${dlStr}. Después de esa hora no podrás editar tus pronósticos.`;
+    bannerEl.style.background='rgba(212,168,0,0.08)';
+    bannerEl.style.borderColor='rgba(212,168,0,0.3)';
+    bannerEl.style.color='var(--gold2)';
+  }
+}
+
+function launchApp(){
+  document.getElementById('regScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  document.getElementById('welcomeName').textContent=currentUser.fullName||currentUser.nombre||'';
+  const codigoEl=document.getElementById('welcomeCodigo');
+  if(codigoEl) codigoEl.textContent=currentUser.codigoAcceso||'—';
+  populateSelects();
+  buildGrupos();
+  restoreEspeciales();
+  const bannerEl=document.getElementById('deadlineBanner');
+  if(bannerEl) updateDeadlineBannerEl(bannerEl);
+}
+
+function cerrarSesion(){
+  // Forzar guardado antes de mostrar modal
+  autoSavePron();
+  openModal('cerrarSesionModal');
+}
+
+async function confirmarCerrarSesion(){
+  await saveParticipantPron();
+  try{
+    await fbSet('participants', currentUser.correo, {
+      pronosticos, especiales, lastUpdate:new Date().toISOString()
+    });
+  }catch(ex){}
+  localStorage.removeItem(LS_USER);
+  currentUser=null; pronosticos={}; especiales={campeon:'',subcampeon:'',goleador:''};
+  closeModal('cerrarSesionModal');
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('regScreen').style.display='flex';
+  ['rCorreo','rPin'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  showToast('✅ Sesión cerrada. ¡Hasta pronto!');
+}
+
+/* ══════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════ */
+function showTab(id){
+  const ids=['pronosticos','especiales','mipuntaje','tabla','grupos','comparar','otrospronosticos','puntaje'];
+  document.querySelectorAll('#appScreen .tab').forEach((t,i)=>t.classList.toggle('active',ids[i]===id));
+  ids.forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el) el.classList.toggle('active',t===id);
+  });
+  if(id==='tabla') calcularTabla();
+  if(id==='comparar') buildComparacion();
+  if(id==='mipuntaje') buildMiPuntaje();
+  if(id==='grupos') buildGruposStandings('gruposStandingsContainer');
+  if(id==='otrospronosticos') buildOtrosPronSelector();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══════════════════════════════════════════════════
+   BUILD GRUPOS (pronósticos)
+══════════════════════════════════════════════════ */
+function buildGrupos(){
+  const c=document.getElementById('gruposContainer');
+  c.innerHTML='';
+  const locked=isDeadlinePassed();
+  for(const g in GROUPS){
+    const teams=GROUPS[g].teams;
+    let matchHtml='<div class="matches-wrap">';
+    for(let ji=0;ji<3;ji++){
+      const slice=GSCHED[g].slice(ji*2,ji*2+2);
+      matchHtml+=`<div class="jornada-label">Jornada ${ji+1}</div>`;
+      slice.forEach(([hi,ai,mn,date])=>{
+        const key=mn;
+        const p=pronosticos[key]||{h:'',a:''};
+        matchHtml+=`<div class="match-score-row" title="${mn} · ${date}">
+          <div class="msr-team msr-home">
+            <span class="msr-name">${teams[hi].n}</span>
+            <span class="msr-flag">${teams[hi].f}</span>
+          </div>
+          <div class="score-wrap">
+            <input class="sinp" type="number" min="0" max="20" placeholder="–"
+              value="${p.h!==''&&p.h!==null&&p.h!==undefined?p.h:''}"
+              ${locked?'disabled style="opacity:0.4;cursor:not-allowed"':'oninput="setPron(\''+key+'\',\'h\',this.value)" onfocus="this.select()"'}>
+            <span class="ssep">:</span>
+            <input class="sinp" type="number" min="0" max="20" placeholder="–"
+              value="${p.a!==''&&p.a!==null&&p.a!==undefined?p.a:''}"
+              ${locked?'disabled style="opacity:0.4;cursor:not-allowed"':'oninput="setPron(\''+key+'\',\'a\',this.value)" onfocus="this.select()"'}>
+          </div>
+          <div class="msr-team msr-away">
+            <span class="msr-flag">${teams[ai].f}</span>
+            <span class="msr-name">${teams[ai].n}</span>
+          </div>
+        </div>`;
+      });
+    }
+    matchHtml+='</div>';
+
+    const card=document.createElement('div');
+    card.className='group-card';
+    card.innerHTML=`
+      <div class="group-header gh-${g}">⚽ GRUPO ${g}</div>
+      <div class="group-body">${matchHtml}</div>`;
+    c.appendChild(card);
+  }
+}
+
+function setPron(mn,side,val){
+  if(isDeadlinePassed()) return;
+  if(!pronosticos[mn]) pronosticos[mn]={h:'',a:''};
+  pronosticos[mn][side]=val===''?'':parseInt(val)||0;
+  autoSavePron();
+}
+
+function autoSavePron(){
+  saveParticipantPron(); // async, no bloquea UI
+}
+
+async function saveParticipantPron(){
+  if(!currentUser) return;
+  try{
+    await fbSet('participants', currentUser.correo, {
+      pronosticos,
+      lastUpdate: new Date().toISOString()
+    });
+  }catch(ex){console.error('saveParticipantPron',ex);}
+}
+
+function guardarPronosticos(){
+  if(isDeadlinePassed()){showToast('🔒 La fecha límite venció. No puedes guardar pronósticos.');return;}
+  autoSavePron();
+  showToast('💾 Pronósticos guardados correctamente');
+}
+
+/* ══════════════════════════════════════════════════
+   ESPECIALES
+══════════════════════════════════════════════════ */
+function restoreEspeciales(){
+  const elC=document.getElementById('pickCampeon');
+  const elS=document.getElementById('pickSubcampeon');
+  const elG=document.getElementById('pickGoleador');
+  if(elC) elC.value=especiales.campeon||'';
+  if(elS) elS.value=especiales.subcampeon||'';
+  if(elG) elG.value=especiales.goleador||'';
+}
+
+async function guardarEspeciales(){
+  if(isDeadlinePassed()){showToast('🔒 La fecha límite venció. No puedes guardar picks.');return;}
+  especiales={
+    campeon:document.getElementById('pickCampeon').value,
+    subcampeon:document.getElementById('pickSubcampeon').value,
+    goleador:document.getElementById('pickGoleador').value.trim()
+  };
+  try{
+    await fbSet('participants', currentUser.correo, {
+      especiales,
+      lastUpdate: new Date().toISOString()
+    });
+    showToast('💾 Picks especiales guardados');
+  }catch(ex){showToast('⚠ Error al guardar picks.');}
+}
+
+/* ══════════════════════════════════════════════════
+   CÁLCULO DE PUNTOS
+══════════════════════════════════════════════════ */
+function getResultado(h,a){
+  // h,a son números o ''
+  if(h===''||h===null||h===undefined||a===''||a===null||a===undefined) return null;
+  const hn=parseInt(h),an=parseInt(a);
+  if(isNaN(hn)||isNaN(an)) return null;
+  if(hn>an) return 'H';
+  if(an>hn) return 'A';
+  return 'D';
+}
+
+function calcularPuntosMN(pronH,pronA,realH,realA){
+  if(pronH===''||pronA===''||realH===''||realA==='') return {pts:0,tipo:'missing'};
+  const pRon=parseInt(pronH),pRA=parseInt(pronA);
+  const rH=parseInt(realH),rA=parseInt(realA);
+  if(isNaN(pRon)||isNaN(pRA)||isNaN(rH)||isNaN(rA)) return {pts:0,tipo:'missing'};
+  // Marcador exacto
+  if(pRon===rH&&pRA===rA) return {pts:5,tipo:'exact'};
+  // Resultado correcto
+  const pronRes=getResultado(pRon,pRA);
+  const realRes=getResultado(rH,rA);
+  if(pronRes===realRes) return {pts:3,tipo:'correct'};
+  return {pts:0,tipo:'wrong'};
+}
+
+function calcularPuntosParticipante(part,resultados,realEsp){
+  let pts=0,exactos=0,correctos=0,errados=0;
+  const pron=part.pronosticos||{};
+
+  // Grupos
+  for(const mn in resultados){
+    const r=resultados[mn];
+    if(r.h===''||r.a==='') continue;
+    const p=pron[mn]||{h:'',a:''};
+    const res=calcularPuntosMN(p.h,p.a,r.h,r.a);
+    pts+=res.pts;
+    if(res.tipo==='exact') exactos++;
+    else if(res.tipo==='correct') correctos++;
+    else if(res.tipo==='wrong') errados++;
+  }
+
+  // Especiales
+  const esp=part.especiales||{};
+  if(realEsp){
+    if(realEsp.campeon&&esp.campeon&&realEsp.campeon===esp.campeon) pts+=10;
+    if(realEsp.subcampeon&&esp.subcampeon&&realEsp.subcampeon===esp.subcampeon) pts+=5;
+    if(realEsp.goleador&&esp.goleador&&
+       realEsp.goleador.trim().toLowerCase()===esp.goleador.trim().toLowerCase()) pts+=10;
+  }
+
+  return {pts,exactos,correctos,errados};
+}
+
+/* ══════════════════════════════════════════════════
+   TABLA EN VIVO
+══════════════════════════════════════════════════ */
+function calcularTabla(){
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const results=FB_RESULTS;
+    const realEsp=FB_REAL_ESP;
+
+    document.getElementById('totalParticipantes').textContent=parts.length+' participante'+(parts.length!==1?'s':'');
+
+    const ranking=parts.map(p=>{
+      const score=calcularPuntosParticipante(p,results,realEsp);
+      return{...p,...score};
+    }).sort((a,b)=>b.pts-a.pts||b.exactos-a.exactos);
+
+    const myCorreo=currentUser?currentUser.correo:'';
+    let html='';
+    ranking.forEach((p,i)=>{
+      const isMe=p.correo===myCorreo;
+      const rankClass=i===0?'r1':i===1?'r2':i===2?'r3':'';
+      html+=`<tr class="${isMe?'lb-me':''}">
+        <td><div class="lb-rank ${rankClass}">${i+1}</div></td>
+        <td>
+          <div class="lb-name">${escHtml(p.fullName||p.nombre+' '+p.apellido)}${isMe?' <span style="color:var(--gold2);font-size:0.65rem">(Tú)</span>':''}</div>
+          <div class="lb-detail">✓${p.exactos} exactos · ✓${p.correctos} correctos</div>
+        </td>
+        <td><div class="lb-pts">${p.pts}</div></td>
+      </tr>`;
+    });
+
+    document.getElementById('leaderboardBody').innerHTML=ranking.length?
+      `<table class="lb-table">
+        <thead><tr><th>#</th><th>Participante</th><th>Pts</th></tr></thead>
+        <tbody>${html}</tbody>
+       </table>`:
+      '<div style="padding:2rem;text-align:center;color:var(--muted);font-family:\'Barlow Condensed\',sans-serif;font-size:0.85rem">Aún no hay resultados cargados.</div>';
+  }catch(ex){console.error(ex);}
+}
+
+/* ══════════════════════════════════════════════════
+   COMPARACIÓN
+══════════════════════════════════════════════════ */
+function buildComparacion(){
+  if(!currentUser) return;
+  try{
+    const results=FB_RESULTS;
+    const parts=Object.values(FB_PARTICIPANTS);
+    const myPart=parts.find(p=>p.correo===currentUser.correo)||currentUser;
+    const pron=myPart.pronosticos||pronosticos;
+    let html='';
+
+    for(const g in GSCHED){
+      html+=`<div style="margin-bottom:1.5rem"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.5rem">GRUPO ${g}</div>`;
+      GSCHED[g].forEach(([hi,ai,mn,date])=>{
+        const tH=GROUPS[g].teams[hi];
+        const tA=GROUPS[g].teams[ai];
+        const p=pron[mn]||{h:'',a:''};
+        const r=results[mn]||{h:'',a:''};
+        const res=calcularPuntosMN(p.h,p.a,r.h,r.a);
+        const hasReal=r.h!==''&&r.h!==null&&r.h!==undefined&&r.a!==''&&r.a!==null&&r.a!==undefined;
+        const hasPron=p.h!==''&&p.h!==null&&p.h!==undefined&&p.a!==''&&p.a!==null&&p.a!==undefined;
+
+        let rowStyle='';
+        let ptsBadge='';
+        if(hasReal&&hasPron){
+          if(res.tipo==='exact'){rowStyle='background:rgba(212,168,0,0.08);border-left:3px solid var(--gold)';ptsBadge=`<span style="color:var(--gold2);font-weight:800;font-size:0.75rem">+5 pts ⭐</span>`;}
+          else if(res.tipo==='correct'){rowStyle='background:rgba(20,160,80,0.06);border-left:3px solid var(--green)';ptsBadge=`<span style="color:var(--green);font-weight:800;font-size:0.75rem">+3 pts ✓</span>`;}
+          else{rowStyle='border-left:3px solid var(--red)';ptsBadge=`<span style="color:var(--red);font-weight:700;font-size:0.75rem">0 pts ✗</span>`;}
+        }
+
+        html+=`<div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border-radius:7px;margin-bottom:3px;${rowStyle}">
+          <div style="font-size:0.78rem;font-weight:600">${tH.f} ${tH.n} vs ${tA.f} ${tA.n}</div>
+          <div style="text-align:center">
+            <div style="font-size:0.62rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">MI PRONÓSTICO</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;color:${hasPron?'var(--text)':'var(--faint)'}">${hasPron?p.h+' : '+p.a:'– : –'}</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:0.62rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">REAL</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;color:${hasReal?'var(--gold2)':'var(--faint)'}">${hasReal?r.h+' : '+r.a:'– : –'}</div>
+          </div>
+          ${ptsBadge?`<div>${ptsBadge}</div>`:''}
+        </div>`;
+      });
+      html+='</div>';
+    }
+
+    document.getElementById('comparacionContainer').innerHTML=html||'<div style="color:var(--muted);padding:2rem;text-align:center">No hay resultados disponibles aún.</div>';
+  }catch(ex){console.error(ex);}
+}
+
+/* ══════════════════════════════════════════════════
+   MI PUNTAJE (vista del usuario)
+══════════════════════════════════════════════════ */
+function buildMiPuntaje(){
+  if(!currentUser) return;
+  try{
+    const results=FB_RESULTS;
+    const realEsp=FB_REAL_ESP;
+    const parts=Object.values(FB_PARTICIPANTS);
+    const myPart=parts.find(p=>p.correo===currentUser.correo)||currentUser;
+    const pron=myPart.pronosticos||pronosticos;
+    const esp=myPart.especiales||especiales||{};
+
+    const score=calcularPuntosParticipante(myPart,results,realEsp);
+    const totalPts=score.pts;
+    const exactos=score.exactos;
+    const correctos=score.correctos;
+
+    // Ranking
+    const ranking=parts.map(p=>{
+      const s=calcularPuntosParticipante(p,results,realEsp);
+      return{...p,...s};
+    }).sort((a,b)=>b.pts-a.pts||b.exactos-a.exactos);
+    const miPos=ranking.findIndex(p=>p.correo===currentUser.correo)+1;
+    const total=ranking.length;
+
+    // Puntos por partido
+    let matchRows='';
+    let ptsPartidos=0;
+    for(const g in GSCHED){
+      GSCHED[g].forEach(([hi,ai,mn,date])=>{
+        const tH=GROUPS[g].teams[hi];
+        const tA=GROUPS[g].teams[ai];
+        const p=pron[mn]||{h:'',a:''};
+        const r=results[mn]||{h:'',a:''};
+        const hasReal=r.h!==''&&r.h!==null&&r.h!==undefined&&r.a!==''&&r.a!==null&&r.a!==undefined;
+        const hasPron=p.h!==''&&p.h!==null&&p.h!==undefined&&p.a!==''&&p.a!==null&&p.a!==undefined;
+        const res=calcularPuntosMN(p.h,p.a,r.h,r.a);
+        ptsPartidos+=res.pts;
+
+        let rowBg='',ptsStr='',ptsColor='var(--muted)';
+        if(hasReal&&hasPron){
+          if(res.tipo==='exact'){rowBg='background:rgba(212,168,0,0.09);border-left:3px solid var(--gold)';ptsStr='+5 ⭐';ptsColor='var(--gold2)';}
+          else if(res.tipo==='correct'){rowBg='background:rgba(20,160,80,0.07);border-left:3px solid var(--green)';ptsStr='+3 ✓';ptsColor='var(--green)';}
+          else if(res.tipo==='wrong'){rowBg='border-left:3px solid var(--red)';ptsStr='0 ✗';ptsColor='var(--red)';}
+        }else if(!hasPron&&hasReal){
+          rowBg='border-left:3px solid var(--faint)';ptsStr='—';ptsColor='var(--faint)';
+        }
+
+        matchRows+=`<tr style="${rowBg}">
+          <td style="font-size:0.68rem;color:var(--muted);padding:5px 8px;white-space:nowrap">${mn}<br><span style="font-size:0.6rem">${date}</span></td>
+          <td style="padding:5px 8px;font-size:0.72rem;font-weight:600">${tH.f} ${tH.n} <span style="color:var(--faint)">vs</span> ${tA.f} ${tA.n}</td>
+          <td style="padding:5px 8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.9rem">${hasPron?p.h+':'+p.a:'–'}</td>
+          <td style="padding:5px 8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.9rem;color:var(--gold2)">${hasReal?r.h+':'+r.a:'–'}</td>
+          <td style="padding:5px 8px;text-align:right;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.9rem;color:${ptsColor}">${ptsStr}</td>
+        </tr>`;
+      });
+    }
+
+    // Especiales
+    const campAcierto=realEsp.campeon&&esp.campeon&&realEsp.campeon===esp.campeon;
+    const subcAcierto=realEsp.subcampeon&&esp.subcampeon&&realEsp.subcampeon===esp.subcampeon;
+    const golAcierto=realEsp.goleador&&esp.goleador&&realEsp.goleador.trim().toLowerCase()===esp.goleador.trim().toLowerCase();
+
+    const espHtml=`
+      <tr style="${campAcierto?'background:rgba(212,168,0,0.09);border-left:3px solid var(--gold)':''}">
+        <td style="padding:5px 8px;font-size:0.68rem;color:var(--muted)">CAMPEÓN</td>
+        <td colspan="2" style="padding:5px 8px;font-size:0.72rem;font-weight:600">${esp.campeon||'—'}</td>
+        <td style="padding:5px 8px;text-align:center;font-size:0.72rem;color:var(--gold2)">${realEsp.campeon||'—'}</td>
+        <td style="padding:5px 8px;text-align:right;font-family:'Barlow Condensed',sans-serif;font-weight:800;color:${campAcierto?'var(--gold2)':'var(--muted)'}">${campAcierto?'+10 🏆':'—'}</td>
+      </tr>
+      <tr style="${subcAcierto?'background:rgba(24,120,200,0.09);border-left:3px solid var(--cyan)':''}">
+        <td style="padding:5px 8px;font-size:0.68rem;color:var(--muted)">SUBCAMPEÓN</td>
+        <td colspan="2" style="padding:5px 8px;font-size:0.72rem;font-weight:600">${esp.subcampeon||'—'}</td>
+        <td style="padding:5px 8px;text-align:center;font-size:0.72rem;color:var(--gold2)">${realEsp.subcampeon||'—'}</td>
+        <td style="padding:5px 8px;text-align:right;font-family:'Barlow Condensed',sans-serif;font-weight:800;color:${subcAcierto?'var(--cyan2)':'var(--muted)'}">${subcAcierto?'+5 🥈':'—'}</td>
+      </tr>
+      <tr style="${golAcierto?'background:rgba(20,160,80,0.09);border-left:3px solid var(--green)':''}">
+        <td style="padding:5px 8px;font-size:0.68rem;color:var(--muted)">GOLEADOR</td>
+        <td colspan="2" style="padding:5px 8px;font-size:0.72rem;font-weight:600">${esp.goleador||'—'}</td>
+        <td style="padding:5px 8px;text-align:center;font-size:0.72rem;color:var(--gold2)">${realEsp.goleador||'—'}</td>
+        <td style="padding:5px 8px;text-align:right;font-family:'Barlow Condensed',sans-serif;font-weight:800;color:${golAcierto?'var(--green)':'var(--muted)'}">${golAcierto?'+10 ⚽':'—'}</td>
+      </tr>`;
+
+    const ptsEspeciales=totalPts-ptsPartidos;
+
+    document.getElementById('miPuntajeContainer').innerHTML=`
+      <!-- RESUMEN -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.7rem;margin-bottom:1.2rem">
+        <div style="background:linear-gradient(135deg,rgba(212,168,0,0.15),rgba(212,168,0,0.05));border:1px solid rgba(212,168,0,0.35);border-radius:12px;padding:1rem;text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--gold2);line-height:1">${totalPts}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">Puntos Totales</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:${miPos<=3?'var(--gold2)':'var(--text)'};line-height:1">${miPos>0?'#'+miPos:'—'}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">Posición de ${total}</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--gold2);line-height:1">${exactos}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">Exactos (5pts)</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--green);line-height:1">${correctos}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">Correctos (3pts)</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--cyan2);line-height:1">${ptsPartidos}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">Pts Partidos</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--purple2);line-height:1">${ptsEspeciales}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">Pts Especiales</div>
+        </div>
+      </div>
+
+      <!-- TABLA DETALLADA -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+        <div style="padding:0.7rem 1rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--cyan2);background:var(--card2);display:flex;align-items:center;justify-content:space-between">
+          <span>📋 DESGLOSE POR PARTIDO</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:var(--muted)">🟡 Exacto · 🟢 Correcto · 🔴 Error · — Sin resultado</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:0.75rem;min-width:500px">
+            <thead>
+              <tr style="background:var(--card2)">
+                <th style="padding:6px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">PARTIDO</th>
+                <th style="padding:6px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">EQUIPOS</th>
+                <th style="padding:6px 8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:var(--cyan2);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">MI PRONÓSTICO</th>
+                <th style="padding:6px 8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:var(--gold2);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">REAL</th>
+                <th style="padding:6px 8px;text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">PTS</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${matchRows}
+              <tr style="background:rgba(255,255,255,0.03)"><td colspan="5" style="padding:4px 8px;font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase">— PICKS ESPECIALES —</td></tr>
+              ${espHtml}
+            </tbody>
+            <tfoot>
+              <tr style="background:rgba(212,168,0,0.08);border-top:2px solid rgba(212,168,0,0.3)">
+                <td colspan="4" style="padding:10px 8px;font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:800;color:var(--gold2);letter-spacing:1px;text-transform:uppercase">TOTAL</td>
+                <td style="padding:10px 8px;text-align:right;font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--gold2)">${totalPts} pts</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      ${total===0?'<div style="margin-top:0.8rem;font-size:0.75rem;color:var(--muted);text-align:center">Los puntos se calcularán cuando el administrador ingrese resultados reales.</div>':''}
+    `;
+  }catch(ex){console.error(ex);}
+}
+
+
+function exportarCSV(){
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const results=FB_RESULTS;
+    const realEsp=FB_REAL_ESP;
+
+    const ranking=parts.map(p=>{
+      const score=calcularPuntosParticipante(p,results,realEsp);
+      return{...p,...score};
+    }).sort((a,b)=>b.pts-a.pts||b.exactos-a.exactos);
+
+    let rows=[['QUINIELA MUNDIAL FIFA 2026'],[''],['#','Nombre','Apellido','Correo','Celular','Puntos','Exactos','Correctos']];
+    ranking.forEach((p,i)=>rows.push([i+1,p.nombre||'',p.apellido||'',p.correo||'',p.celular||'',p.pts,p.exactos,p.correctos]));
+
+    const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download='Quiniela_Mundial_2026_tabla.csv';a.click();
+    showToast('⬇ CSV descargado');
+  }catch(ex){showToast('Error al exportar');}
+}
+
+/* ══════════════════════════════════════════════════
+   ADMIN
+══════════════════════════════════════════════════ */
+function showAdminLogin(){
+  document.getElementById('adminPass').value='';
+  document.getElementById('adminErr').style.display='none';
+  openModal('adminLoginModal');
+}
+
+function verifyAdmin(){
+  // Rate limiting
+  try{
+    const attData=JSON.parse(localStorage.getItem(LS_ADMIN_ATTEMPTS)||'{"count":0,"since":0}');
+    const now=Date.now();
+    if(attData.count>=MAX_ADMIN_ATTEMPTS&&(now-attData.since)<ADMIN_LOCKOUT_MS){
+      const minsLeft=Math.ceil((ADMIN_LOCKOUT_MS-(now-attData.since))/60000);
+      document.getElementById('adminErr').style.display='block';
+      document.getElementById('adminErr').textContent=`🔒 Demasiados intentos. Bloqueado por ${minsLeft} min.`;
+      return;
+    }
+    if((now-attData.since)>ADMIN_LOCKOUT_MS){
+      // Reset tras el período
+      localStorage.setItem(LS_ADMIN_ATTEMPTS,JSON.stringify({count:0,since:now}));
+    }
+  }catch(ex){}
+
+  const pass=document.getElementById('adminPass').value;
+  if(pass===ADMIN_PASSWORD){
+    try{localStorage.setItem(LS_ADMIN_ATTEMPTS,JSON.stringify({count:0,since:Date.now()}));}catch(ex){}
+    closeModal('adminLoginModal');
+    launchAdmin();
+  }else{
+    try{
+      const attData=JSON.parse(localStorage.getItem(LS_ADMIN_ATTEMPTS)||'{"count":0,"since":0}');
+      const newCount=attData.count+1;
+      const since=attData.count===0?Date.now():attData.since;
+      localStorage.setItem(LS_ADMIN_ATTEMPTS,JSON.stringify({count:newCount,since}));
+      const left=MAX_ADMIN_ATTEMPTS-newCount;
+      document.getElementById('adminErr').style.display='block';
+      document.getElementById('adminErr').textContent=left>0?`⚠ Contraseña incorrecta. ${left} intentos restantes.`:'🔒 Acceso bloqueado por 15 minutos.';
+    }catch(ex){}
+  }
+}
+
+function showAdminTab(id){
+  const ids=['atab-participantes','atab-pronosticos','atab-posiciones','atab-grupos','atab-resultados','atab-config'];
+  ids.forEach(tid=>{
+    const panel=document.getElementById(tid);
+    if(panel) panel.style.display=(tid===id)?'block':'none';
+  });
+  document.querySelectorAll('#adminScreen .tab').forEach((t,i)=>{
+    t.classList.toggle('active', ids[i]===id);
+  });
+  if(id==='atab-posiciones'){ buildAdminPosiciones(); buildAdminTablaComparativa(); }
+  if(id==='atab-pronosticos') buildAdminPronósticos();
+  if(id==='atab-participantes') buildAdminParticipants();
+  if(id==='atab-grupos') buildGruposStandings('adminGruposStandingsContainer');
+  if(id==='atab-resultados'){ buildAdminResults(); restoreRealEsp(); }
+  if(id==='atab-config') restoreDeadlineAdmin();
+}
+
+function cerrarSesionAdmin(){
+  if(!confirm('¿Cerrar sesión de administrador?')) return;
+  document.getElementById('adminScreen').style.display='none';
+  currentUser=null;
+  document.getElementById('regScreen').style.display='flex';
+  showToast('✅ Sesión de administrador cerrada');
+}
+
+function buildAdminPosiciones(){
+  const c=document.getElementById('adminPosicionesContainer');
+  if(!c) return;
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const results=FB_RESULTS;
+    const realEsp=FB_REAL_ESP;
+
+    if(!parts.length){
+      c.innerHTML='<div style="color:var(--muted);padding:1.5rem;text-align:center;font-size:0.82rem">No hay participantes registrados.</div>';
+      return;
+    }
+
+    const ranked=parts.map(p=>{
+      const s=calcularPuntosParticipante(p,results,realEsp);
+      return{...p,...s};
+    }).sort((a,b)=>b.pts-a.pts||b.exactos-a.exactos||b.correctos-a.correctos);
+
+    const rankIcon=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    const rankColor=i=>i===0?'var(--gold2)':i===1?'#c0c8d8':i===2?'#c08040':'var(--muted)';
+
+    let html=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.8rem;min-width:560px">
+      <thead>
+        <tr style="background:var(--card2)">
+          <th style="padding:8px 12px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">#</th>
+          <th style="padding:8px 12px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">Participante</th>
+          <th style="padding:8px 12px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--gold2);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">Pts Total</th>
+          <th style="padding:8px 12px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--gold2);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">⭐ Exactos</th>
+          <th style="padding:8px 12px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--green);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">✓ Correctos</th>
+          <th style="padding:8px 12px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">✗ Errados</th>
+          <th style="padding:8px 12px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">Pago</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    ranked.forEach((p,i)=>{
+      const monto=p.monto||0;
+      const pagoStr=monto>0?`<span style="color:var(--green)">✅ $${monto.toFixed(2)}</span>`:'<span style="color:var(--gold)">⏳ Pendiente</span>';
+      html+=`<tr style="border-bottom:1px solid rgba(0,0,0,0.05);${i<3?'background:rgba(255,255,255,0.015)':''}">
+        <td style="padding:8px 12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:${rankColor(i)}">${rankIcon(i)?rankIcon(i):(i+1)}</td>
+        <td style="padding:8px 12px">
+          <div style="font-weight:700;font-size:0.85rem">${escHtml(p.fullName||p.nombre+' '+(p.apellido||''))}</div>
+          <div style="font-size:0.68rem;color:var(--muted)">${escHtml(p.correo||'')}</div>
+        </td>
+        <td style="padding:8px 12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--gold2)">${p.pts||0}</td>
+        <td style="padding:8px 12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--gold2)">${p.exactos||0}</td>
+        <td style="padding:8px 12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--green)">${p.correctos||0}</td>
+        <td style="padding:8px 12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--muted)">${p.errados||0}</td>
+        <td style="padding:8px 12px;text-align:center;font-size:0.75rem">${pagoStr}</td>
+      </tr>`;
+    });
+
+    html+=`</tbody></table></div>`;
+    c.innerHTML=html;
+  }catch(ex){c.innerHTML='<div style="color:var(--red);padding:1rem">Error al cargar posiciones.</div>';}
+}
+
+function launchAdmin(){
+  document.getElementById('regScreen').style.display='none';
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('adminScreen').style.display='block';
+  populateSelects();
+  showAdminTab('atab-participantes');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function guardarDeadline(){
+  const val=document.getElementById('adminDeadline').value;
+  if(!val){fbSet('config','general',{deadline:null});showDeadlineStatus();showToast('⏰ Fecha límite eliminada');return;}
+  fbSet('config','general',{deadline:new Date(val).toISOString()});
+  showDeadlineStatus();
+  showToast('✅ Fecha límite guardada');
+}
+
+function restoreDeadlineAdmin(){
+  try{
+    const dl=FB_CONFIG.deadline;
+    if(dl){
+      // Convertir ISO a formato datetime-local
+      const d=new Date(dl);
+      const pad=n=>String(n).padStart(2,'0');
+      const local=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      document.getElementById('adminDeadline').value=local;
+    }
+  }catch(ex){}
+  showDeadlineStatus();
+}
+
+function showDeadlineStatus(){
+  const el=document.getElementById('deadlineStatus');
+  if(!el) return;
+  const dl=FB_CONFIG.deadline;
+  if(!dl){el.textContent='Sin fecha límite configurada. Los participantes pueden editar en cualquier momento.';el.style.color='var(--muted)';return;}
+  const passed=isDeadlinePassed();
+  const str=getDeadlineStr();
+  if(passed){
+    el.innerHTML=`🔒 <strong style="color:var(--red)">CERRADO</strong> — Venció el ${str}. Los participantes ya no pueden editar.`;
+  } else {
+    el.innerHTML=`🟢 <strong style="color:var(--green)">ACTIVO</strong> — Cierra el <strong>${str}</strong>. Los participantes aún pueden editar.`;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   RESET ADMIN
+══════════════════════════════════════════════════ */
+async function resetTodoAdmin(){
+  showLoadingOverlay('Borrando datos…');
+  try{
+    const snap=await db.collection('participants').get();
+    const batch=db.batch();
+    snap.docs.forEach(d=>batch.delete(d.ref));
+    await batch.commit();
+    await fbSet('results','partidos',{});
+    await fbSet('results','especiales',{});
+    FB_PARTICIPANTS={};FB_RESULTS={};FB_REAL_ESP={};
+    buildAdminParticipants();buildAdminTablaComparativa();buildAdminResults();buildAdminPronósticos();buildAdminPosiciones();
+    hideLoadingOverlay();
+    showToast('🗑 Todos los datos fueron borrados');
+  }catch(ex){hideLoadingOverlay();showToast('⚠ Error al borrar: '+ex.message);}
+}
+
+/* ══════════════════════════════════════════════════
+   STANDINGS DE GRUPOS (criterios FIFA)
+══════════════════════════════════════════════════ */
+function calcularStandingsGrupo(g){
+  let results={};
+  try{results=FB_RESULTS;}catch(ex){}
+  const teams=GROUPS[g].teams;
+  const stats=teams.map((t,i)=>({idx:i,name:t.n,flag:t.f,pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0}));
+
+  GSCHED[g].forEach(([hi,ai,mn])=>{
+    const r=results[mn];
+    if(!r||r.h===''||r.h===null||r.h===undefined||r.a===''||r.a===null||r.a===undefined) return;
+    const gh=parseInt(r.h), ga=parseInt(r.a);
+    const sh=stats[hi], sa=stats[ai];
+    sh.pj++; sa.pj++;
+    sh.gf+=gh; sh.gc+=ga;
+    sa.gf+=ga; sa.gc+=gh;
+    if(gh>ga){ sh.pg++; sh.pts+=3; sa.pp++; }
+    else if(gh<ga){ sa.pg++; sa.pts+=3; sh.pp++; }
+    else{ sh.pe++; sa.pe++; sh.pts+=1; sa.pts+=1; }
+  });
+
+  // Función auxiliar: resultados directos entre dos equipos
+  function headToHead(iA,iB){
+    let ptsA=0,ptsB=0,gfA=0,gfB=0;
+    GSCHED[g].forEach(([hi,ai,mn])=>{
+      const r=results[mn];
+      if(!r||r.h===''||r.h===null||r.a===''||r.a===null) return;
+      const gh=parseInt(r.h),ga=parseInt(r.a);
+      if(hi===iA&&ai===iB){ gfA+=gh;gfB+=ga; if(gh>ga)ptsA+=3;else if(gh<ga)ptsB+=3;else{ptsA++;ptsB++;} }
+      if(hi===iB&&ai===iA){ gfB+=gh;gfA+=ga; if(gh>ga)ptsB+=3;else if(gh<ga)ptsA+=3;else{ptsA++;ptsB++;} }
+    });
+    return {ptsA,ptsB,gfA,gfB};
+  }
+
+  stats.sort((a,b)=>{
+    if(b.pts!==a.pts) return b.pts-a.pts;
+    const dgA=a.gf-a.gc, dgB=b.gf-b.gc;
+    if(dgB!==dgA) return dgB-dgA;
+    if(b.gf!==a.gf) return b.gf-a.gf;
+    const h2h=headToHead(a.idx,b.idx);
+    if(h2h.ptsA!==h2h.ptsB) return h2h.ptsB-h2h.ptsA;
+    const dgH=h2h.gfA-h2h.gfB;
+    if(dgH!==0) return -dgH; // positivo = a gana
+    if(h2h.gfA!==h2h.gfB) return h2h.gfB-h2h.gfA;
+    return a.name.localeCompare(b.name);
+  });
+  return stats;
+}
+
+function buildGruposStandings(containerId){
+  const c=document.getElementById(containerId);
+  if(!c) return;
+  let html='<div class="groups-grid">';
+  for(const g in GROUPS){
+    const stats=calcularStandingsGrupo(g);
+    const thStyle='padding:4px 6px;font-family:\'Barlow Condensed\',sans-serif;font-size:0.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);text-align:center';
+    const tdStyle='padding:5px 6px;font-size:0.72rem;text-align:center;border-bottom:1px solid rgba(255,255,255,0.04)';
+    html+=`<div class="group-card">
+      <div class="group-header gh-${g}">⚽ GRUPO ${g}</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr>
+            <th style="${thStyle};text-align:left;padding-left:8px">#</th>
+            <th style="${thStyle};text-align:left">EQUIPO</th>
+            <th style="${thStyle}">PJ</th>
+            <th style="${thStyle}">PG</th>
+            <th style="${thStyle}">PE</th>
+            <th style="${thStyle}">PP</th>
+            <th style="${thStyle}">GF</th>
+            <th style="${thStyle}">GC</th>
+            <th style="${thStyle}">DG</th>
+            <th style="${thStyle};color:var(--gold2)">PTS</th>
+          </tr></thead>
+          <tbody>`;
+    stats.forEach((t,pos)=>{
+      const dg=(t.gf-t.gc);
+      const dgStr=dg>0?'+'+dg:dg;
+      const isClassified=pos<2;
+      const rowBg=isClassified?'background:rgba(21,112,64,0.07)':'';
+      const posIcon=pos===0?'🥇':pos===1?'🥈':'';
+      html+=`<tr style="${rowBg}">
+        <td style="${tdStyle};text-align:left;padding-left:8px;font-size:0.85rem">${posIcon||pos+1}</td>
+        <td style="${tdStyle};text-align:left;font-weight:600;white-space:nowrap">${t.flag} ${t.name}</td>
+        <td style="${tdStyle}">${t.pj}</td>
+        <td style="${tdStyle};color:var(--green)">${t.pg}</td>
+        <td style="${tdStyle}">${t.pe}</td>
+        <td style="${tdStyle};color:var(--red)">${t.pp}</td>
+        <td style="${tdStyle}">${t.gf}</td>
+        <td style="${tdStyle}">${t.gc}</td>
+        <td style="${tdStyle};color:${dg>=0?'var(--green)':'var(--red)'}">${dgStr}</td>
+        <td style="${tdStyle};font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--gold2);font-weight:700">${t.pts}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+  }
+  html+='</div>';
+  c.innerHTML=html;
+}
+
+/* ══════════════════════════════════════════════════
+   ADMIN — PRONÓSTICOS CON DROPDOWN
+══════════════════════════════════════════════════ */
+function buildAdminPronósticos(){
+  const c=document.getElementById('adminPronContainer');
+  if(!c) return;
+  const sel=document.getElementById('adminPronSelector');
+  // Actualizar opciones del selector
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const sorted=[...parts].sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||''));
+    const currentVal=sel?sel.value:'__todos__';
+    if(sel){
+      sel.innerHTML='<option value="__todos__">📋 Todos los participantes (tabla)</option>'+
+        sorted.map(p=>`<option value="${p.correo}">${escHtml(p.fullName||p.nombre)}</option>`).join('');
+      sel.value=currentVal;
+    }
+    if(!parts.length){c.innerHTML='<div style="color:var(--muted);padding:1rem;font-size:0.82rem">No hay participantes aún.</div>';return;}
+
+    const modo=sel?sel.value:'__todos__';
+
+    if(modo==='__todos__'){
+      // Tabla completa — todos vs todos
+      const thSt='padding:5px 8px;text-align:center;color:var(--cyan2);font-family:\'Barlow Condensed\',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap';
+      let html='';
+      for(const g in GSCHED){
+        html+=`<div style="margin-bottom:1.2rem;background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden">
+          <div class="group-header gh-${g}" style="padding:0.5rem 0.85rem;font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:2px">⚽ GRUPO ${g}</div>
+          <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.72rem;min-width:400px">
+            <thead><tr style="background:var(--card2)">
+              <th style="padding:5px 8px;text-align:left;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap">PARTIDO</th>`;
+        sorted.forEach(p=>{ html+=`<th style="${thSt}">${escHtml((p.fullName||p.nombre).split(' ')[0])}</th>`; });
+        html+=`</tr></thead><tbody>`;
+        GSCHED[g].forEach(([hi,ai,mn,date])=>{
+          const tH=GROUPS[g].teams[hi],tA=GROUPS[g].teams[ai];
+          html+=`<tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:5px 8px;white-space:nowrap;font-weight:600;font-size:0.7rem">${tH.f}${tH.n} <span style="color:var(--faint)">vs</span> ${tA.f}${tA.n}</td>`;
+          sorted.forEach(p=>{
+            const pr=(p.pronosticos||{})[mn]||{h:'',a:''};
+            const ok=pr.h!==''&&pr.h!==null&&pr.h!==undefined&&pr.a!==''&&pr.a!==null&&pr.a!==undefined;
+            html+=`<td style="padding:5px 8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.88rem;color:${ok?'var(--text)':'var(--faint)'}">${ok?pr.h+':'+pr.a:'–'}</td>`;
+          });
+          html+=`</tr>`;
+        });
+        html+=`</tbody></table></div></div>`;
+      }
+      c.innerHTML=html;
+    } else {
+      // Un participante específico — mostrar su ficha editable
+      const part=parts.find(p=>p.correo===modo);
+      if(!part){c.innerHTML='<div style="color:var(--muted);padding:1rem">Participante no encontrado.</div>';return;}
+      buildAdminPronParticipante(part,c);
+    }
+  }catch(ex){c.innerHTML='<div style="color:var(--red);padding:1rem">Error al cargar pronósticos.</div>';}
+}
+
+function buildAdminPronParticipante(part,c){
+  const results=FB_RESULTS;
+  let html=`<div style="background:rgba(24,120,200,0.08);border:1px solid rgba(24,120,200,0.2);border-radius:9px;padding:0.7rem 1rem;margin-bottom:1rem;font-size:0.78rem;color:var(--cyan2)">
+    ✏️ Editando pronósticos de <strong>${escHtml(part.fullName||part.nombre)}</strong>. Usa los campos y presiona <strong>💾 GUARDAR PRONÓSTICOS DEL PARTICIPANTE</strong>.
+  </div><div class="groups-grid" id="adminEditPronGrid"></div>`;
+  c.innerHTML=html;
+  const grid=document.getElementById('adminEditPronGrid');
+  for(const g in GROUPS){
+    const teams=GROUPS[g].teams;
+    let rows='<div class="matches-wrap">';
+    for(let ji=0;ji<3;ji++){
+      const slice=GSCHED[g].slice(ji*2,ji*2+2);
+      rows+=`<div class="jornada-label">Jornada ${ji+1}</div>`;
+      slice.forEach(([hi,ai,mn,date])=>{
+        const p=(part.pronosticos||{})[mn]||{h:'',a:''};
+        const r=results[mn]||{h:'',a:''};
+        const hasReal=r.h!==''&&r.h!==null&&r.a!==''&&r.a!==null;
+        rows+=`<div class="match-score-row" title="${mn}·${date}${hasReal?' · Real:'+r.h+':'+r.a:''}">
+          <div class="msr-team msr-home"><span class="msr-name">${teams[hi].n}</span><span class="msr-flag">${teams[hi].f}</span></div>
+          <div class="score-wrap">
+            <input class="sinp" type="number" min="0" max="20" placeholder="–"
+              value="${p.h!==''&&p.h!==null&&p.h!==undefined?p.h:''}"
+              id="aep_${mn}_h" onfocus="this.select()">
+            <span class="ssep">:</span>
+            <input class="sinp" type="number" min="0" max="20" placeholder="–"
+              value="${p.a!==''&&p.a!==null&&p.a!==undefined?p.a:''}"
+              id="aep_${mn}_a" onfocus="this.select()">
+          </div>
+          <div class="msr-team msr-away"><span class="msr-flag">${teams[ai].f}</span><span class="msr-name">${teams[ai].n}</span></div>
+          ${hasReal?`<div style="font-size:0.6rem;color:var(--gold2);text-align:center;grid-column:1/-1;padding-bottom:2px">Real: ${r.h}:${r.a}</div>`:''}
+        </div>`;
+      });
+    }
+    rows+='</div>';
+    const card=document.createElement('div');
+    card.className='group-card';
+    card.innerHTML=`<div class="group-header gh-${g}">⚽ GRUPO ${g}</div><div class="group-body">${rows}</div>`;
+    grid.appendChild(card);
+  }
+}
+
+async function guardarPronosticosAdmin(){
+  const sel=document.getElementById('adminPronSelector');
+  if(!sel||sel.value==='__todos__'){showToast('⚠ Selecciona primero un participante en el selector.');return;}
+  const correo=sel.value;
+  try{
+    const part=FB_PARTICIPANTS[correo];
+    if(!part){showToast('⚠ Participante no encontrado.');return;}
+    const pron={...(part.pronosticos||{})};
+    for(const g in GSCHED){
+      GSCHED[g].forEach(([hi,ai,mn])=>{
+        const hEl=document.getElementById(`aep_${mn}_h`);
+        const aEl=document.getElementById(`aep_${mn}_a`);
+        if(hEl&&aEl){
+          if(!pron[mn]) pron[mn]={h:'',a:''};
+          pron[mn].h=hEl.value!==''?parseInt(hEl.value):'';
+          pron[mn].a=aEl.value!==''?parseInt(aEl.value):'';
+        }
+      });
+    }
+    const score=calcularPuntosParticipante({...part,pronosticos:pron},FB_RESULTS,FB_REAL_ESP);
+    await fbSet('participants', correo, {pronosticos:pron, lastUpdate:new Date().toISOString(), ...score});
+    FB_PARTICIPANTS[correo]={...part,pronosticos:pron,lastUpdate:new Date().toISOString(),...score};
+    showToast('✅ Pronósticos de '+escHtml(part.fullName||part.nombre)+' guardados');
+  }catch(ex){showToast('⚠ Error al guardar: '+ex.message);}
+}
+
+/* ══════════════════════════════════════════════════
+   VER PRONÓSTICOS DE OTROS (vista participante)
+══════════════════════════════════════════════════ */
+function buildOtrosPronSelector(){
+  const sel=document.getElementById('otrosPronSelector');
+  if(!sel) return;
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const sorted=[...parts].sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||''));
+    const currentVal=sel.value;
+    sel.innerHTML='<option value="">— Selecciona un participante —</option>'+
+      sorted.map(p=>`<option value="${p.correo}">${escHtml(p.fullName||p.nombre)}</option>`).join('');
+    if(currentVal) sel.value=currentVal;
+  }catch(ex){}
+  buildOtrosPron();
+}
+
+function buildOtrosPron(){
+  const sel=document.getElementById('otrosPronSelector');
+  const c=document.getElementById('otrosPronContainer');
+  if(!sel||!c) return;
+  const correo=sel.value;
+  if(!correo){c.innerHTML='<div style="color:var(--muted);padding:2rem;text-align:center">Selecciona un participante para ver sus pronósticos.</div>';return;}
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const part=parts.find(p=>p.correo===correo);
+    if(!part){c.innerHTML='<div style="color:var(--muted);padding:1rem">Participante no encontrado.</div>';return;}
+    const results=FB_RESULTS;
+    let html=`<div style="background:rgba(24,120,200,0.06);border:1px solid rgba(24,120,200,0.18);border-radius:8px;padding:0.65rem 1rem;margin-bottom:1rem;font-size:0.8rem;color:var(--cyan2)">
+      👤 Pronósticos de <strong>${escHtml(part.fullName||part.nombre)}</strong>
+    </div><div class="groups-grid">`;
+    for(const g in GROUPS){
+      const teams=GROUPS[g].teams;
+      let rows='<div class="matches-wrap">';
+      for(let ji=0;ji<3;ji++){
+        const slice=GSCHED[g].slice(ji*2,ji*2+2);
+        rows+=`<div class="jornada-label">Jornada ${ji+1}</div>`;
+        slice.forEach(([hi,ai,mn,date])=>{
+          const p=(part.pronosticos||{})[mn]||{h:'',a:''};
+          const r=results[mn]||{h:'',a:''};
+          const hasPron=p.h!==''&&p.h!==null&&p.h!==undefined&&p.a!==''&&p.a!==null&&p.a!==undefined;
+          const hasReal=r.h!==''&&r.h!==null&&r.a!==''&&r.a!==null;
+          const res=calcularPuntosMN(p.h,p.a,r.h,r.a);
+          let pronColor='var(--text)';
+          if(hasReal&&hasPron){
+            if(res.tipo==='exact') pronColor='var(--gold2)';
+            else if(res.tipo==='correct') pronColor='var(--green)';
+            else pronColor='var(--red)';
+          }
+          rows+=`<div class="match-score-row">
+            <div class="msr-team msr-home"><span class="msr-name">${teams[hi].n}</span><span class="msr-flag">${teams[hi].f}</span></div>
+            <div class="score-wrap" style="flex-direction:column;gap:1px">
+              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;color:${pronColor}">${hasPron?p.h+':'+p.a:'–'}</span>
+              ${hasReal?`<span style="font-size:0.6rem;color:var(--gold2)">${r.h}:${r.a}</span>`:''}
+            </div>
+            <div class="msr-team msr-away"><span class="msr-flag">${teams[ai].f}</span><span class="msr-name">${teams[ai].n}</span></div>
+          </div>`;
+        });
+      }
+      rows+='</div>';
+      html+=`<div class="group-card"><div class="group-header gh-${g}">⚽ GRUPO ${g}</div><div class="group-body">${rows}</div></div>`;
+    }
+    html+='</div>';
+    c.innerHTML=html;
+  }catch(ex){c.innerHTML='<div style="color:var(--red);padding:1rem">Error.</div>';}
+}
+
+function exitAdmin(){
+  document.getElementById('adminScreen').style.display='none';
+  if(currentUser){
+    document.getElementById('appScreen').style.display='block';
+  }else{
+    document.getElementById('regScreen').style.display='flex';
+  }
+}
+
+function buildAdminResults(){
+  const c=document.getElementById('adminResultsContainer');
+  if(!c) return;
+  c.innerHTML='';
+  let results={};
+  try{results=FB_RESULTS;}catch(ex){}
+
+  for(const g in GSCHED){
+    const card=document.createElement('div');
+    card.className='result-card';
+    let rows='';
+    GSCHED[g].forEach(([hi,ai,mn,date])=>{
+      const tH=GROUPS[g].teams[hi];
+      const tA=GROUPS[g].teams[ai];
+      const r=results[mn]||{h:'',a:''};
+      rows+=`<div class="result-row">
+        <div class="rr-team home">${tH.f} ${tH.n}</div>
+        <div class="score-wrap">
+          <input class="rinp" type="number" min="0" max="20" placeholder="–"
+            value="${r.h!==''&&r.h!==null&&r.h!==undefined?r.h:''}"
+            id="ra_${mn}_h" onfocus="this.select()" oninput="autoGuardarResultado('${mn}','h',this.value)">
+          <span class="rsep">:</span>
+          <input class="rinp" type="number" min="0" max="20" placeholder="–"
+            value="${r.a!==''&&r.a!==null&&r.a!==undefined?r.a:''}"
+            id="ra_${mn}_a" onfocus="this.select()" oninput="autoGuardarResultado('${mn}','a',this.value)">
+        </div>
+        <div class="rr-team away">${tA.f} ${tA.n}</div>
+      </div>`;
+    });
+    card.innerHTML=`<div class="result-card-hd gh-${g}">⚽ GRUPO ${g}</div><div class="result-card-body">${rows}</div>`;
+    c.appendChild(card);
+  }
+}
+
+async function guardarResultadosReales(){
+  const results={};
+  for(const g in GSCHED){
+    GSCHED[g].forEach(([hi,ai,mn])=>{
+      const hEl=document.getElementById(`ra_${mn}_h`);
+      const aEl=document.getElementById(`ra_${mn}_a`);
+      if(hEl&&aEl){
+        results[mn]={
+          h:hEl.value!==''?parseInt(hEl.value):'',
+          a:aEl.value!==''?parseInt(aEl.value):''
+        };
+      }
+    });
+  }
+  FB_RESULTS=results;
+  await fbSet('results','partidos',results);
+  await guardarRealEsp();
+  await calcularTodosLosPuntos();
+  showToast('✅ Resultados guardados y tabla recalculada');
+}
+
+async function autoGuardarResultado(mn,side,val){
+  try{
+    if(!FB_RESULTS[mn]) FB_RESULTS[mn]={h:'',a:''};
+    FB_RESULTS[mn][side]=val!==''?parseInt(val):'';
+    await fbSet('results','partidos',{[mn]:FB_RESULTS[mn]});
+    if(FB_RESULTS[mn].h!==''&&FB_RESULTS[mn].a!==''){
+      calcularTodosLosPuntos();
+    }
+  }catch(ex){}
+}
+
+function restoreRealEsp(){
+  try{
+    const re=FB_REAL_ESP;
+    const elC=document.getElementById('realCampeon');
+    const elS=document.getElementById('realSubcampeon');
+    const elG=document.getElementById('realGoleador');
+    if(elC&&re.campeon) elC.value=re.campeon;
+    if(elS&&re.subcampeon) elS.value=re.subcampeon;
+    if(elG&&re.goleador) elG.value=re.goleador;
+  }catch(ex){}
+}
+
+async function guardarRealEsp(){
+  const elC=document.getElementById('realCampeon');
+  const elS=document.getElementById('realSubcampeon');
+  const elG=document.getElementById('realGoleador');
+  const re={
+    campeon:elC?elC.value:'',
+    subcampeon:elS?elS.value:'',
+    goleador:elG?(elG.value||'').trim():''
+  };
+  FB_REAL_ESP=re;
+  await fbSet('results','especiales',re);
+}
+
+async function calcularTodosLosPuntos(){
+  try{
+    const results=FB_RESULTS;
+    const realEsp=FB_REAL_ESP;
+    const parts=Object.values(FB_PARTICIPANTS);
+    const batch=db.batch();
+    parts.forEach(p=>{
+      const score=calcularPuntosParticipante(p,results,realEsp);
+      const ref=db.collection('participants').doc(p.correo);
+      batch.set(ref,score,{merge:true});
+      FB_PARTICIPANTS[p.correo]={...FB_PARTICIPANTS[p.correo],...score};
+    });
+    await batch.commit();
+    buildAdminTablaComparativa();
+    buildAdminParticipants();
+    buildAdminPosiciones();
+    ['adminGruposStandingsContainer','gruposStandingsContainer'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el&&el.innerHTML) buildGruposStandings(id);
+    });
+    showToast('⚡ Tabla actualizada para todos los participantes');
+  }catch(ex){console.error(ex);showToast('⚠ Error al recalcular.');}
+}
+
+function regenerarCodigo(){
+  const codigo=generarCodigo();
+  document.getElementById('adminPartPin').value=codigo;
+  document.getElementById('adminPartCodigoDisplay').textContent=codigo;
+}
+
+function abrirModalAgregarPart(){
+  document.getElementById('adminPartModalTitle').textContent='➕ Agregar Participante';
+  document.getElementById('adminPartId').value='';
+  document.getElementById('adminPartNombre').value='';
+  document.getElementById('adminPartCorreo').value='';
+  document.getElementById('adminPartCelular').value='';
+  document.getElementById('adminPartMonto').value=0;
+  document.getElementById('adminPartFechaPago').value='';
+  document.getElementById('adminPartErr').style.display='none';
+  regenerarCodigo(); // genera código automáticamente
+  openModal('adminPartModal');
+}
+
+function abrirModalEditarPart(id){
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const p=parts.find(x=>x.id===id);
+    if(!p) return;
+    document.getElementById('adminPartModalTitle').textContent='✏️ Editar Participante';
+    document.getElementById('adminPartId').value=id;
+    document.getElementById('adminPartNombre').value=p.fullName||((p.nombre||'')+' '+(p.apellido||'')).trim();
+    document.getElementById('adminPartCorreo').value=p.correo||'';
+    document.getElementById('adminPartCelular').value=p.celular||'';
+    // Mostrar código actual (guardado en texto plano) o placeholder
+    const codigoActual=p.codigoAcceso||'(código anterior)';
+    document.getElementById('adminPartPin').value=p.codigoAcceso||'';
+    document.getElementById('adminPartCodigoDisplay').textContent=codigoActual;
+    document.getElementById('adminPartMonto').value=p.monto||0;
+    document.getElementById('adminPartFechaPago').value=p.fechaPago||'';
+    document.getElementById('adminPartErr').style.display='none';
+    openModal('adminPartModal');
+  }catch(ex){}
+}
+
+async function guardarParticipanteAdmin(){
+  const id=document.getElementById('adminPartId').value;
+  const nombreCompleto=document.getElementById('adminPartNombre').value.trim();
+  const correo=document.getElementById('adminPartCorreo').value.trim().toLowerCase();
+  const celular=document.getElementById('adminPartCelular').value.trim();
+  const pin=document.getElementById('adminPartPin').value.trim();
+  const monto=parseFloat(document.getElementById('adminPartMonto').value)||0;
+  const fechaPago=document.getElementById('adminPartFechaPago').value||'';
+  const errEl=document.getElementById('adminPartErr');
+
+  if(!nombreCompleto||!correo){
+    errEl.style.display='block';errEl.textContent='⚠ Nombre y correo son obligatorios.';return;
+  }
+  const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRe.test(correo)){
+    errEl.style.display='block';errEl.textContent='⚠ Correo no válido.';return;
+  }
+  if(pin&&!/^QM26-\d{4}$/.test(pin)){
+    errEl.style.display='block';errEl.textContent='⚠ El código no tiene el formato correcto.';return;
+  }
+  errEl.style.display='none';
+
+  try{
+    let parts=Object.values(FB_PARTICIPANTS);
+    const partes=nombreCompleto.split(' ');
+    const nombre=partes[0]||'';
+    const apellido=partes.slice(1).join(' ')||'';
+
+    if(!id){
+      // Nuevo participante — usar código generado
+      if(parts.some(p=>p.correo===correo)){
+        errEl.style.display='block';errEl.textContent='⚠ Ya existe un participante con ese correo.';return;
+      }
+      const codigo=pin||generarCodigo();
+      const newPart={
+        nombre,apellido,correo,celular,
+        fullName:nombreCompleto,
+        codigoAcceso:codigo,
+        pinHash:hashCodigo(codigo),
+        id:Date.now()+'_'+Math.random().toString(36).substr(2,6),
+        registrado:new Date().toISOString(),
+        monto,fechaPago,
+        pronosticos:{},
+        especiales:{campeon:'',subcampeon:'',goleador:''}
+      };
+      await fbSet('participants', correo, newPart);
+      FB_PARTICIPANTS[correo]=newPart;
+      showToast('✅ '+nombre+' agregado · Código: '+codigo);
+    } else {
+      // Editar existente — buscar por id en cache
+      const existing=Object.values(FB_PARTICIPANTS).find(p=>p.id===id);
+      if(!existing){errEl.style.display='block';errEl.textContent='⚠ Participante no encontrado.';return;}
+      if(Object.values(FB_PARTICIPANTS).some(p=>p.correo===correo&&p.id!==id)){
+        errEl.style.display='block';errEl.textContent='⚠ Ese correo ya está en uso.';return;
+      }
+      const updated={...existing,nombre,apellido,fullName:nombreCompleto,correo,celular,monto,fechaPago,lastUpdate:new Date().toISOString()};
+      if(pin&&/^QM26-\d{4}$/.test(pin)){updated.codigoAcceso=pin;updated.pinHash=hashCodigo(pin);}
+      await fbSet('participants', correo, updated);
+      FB_PARTICIPANTS[correo]=updated;
+      showToast('✅ Participante actualizado');
+    }
+    closeModal('adminPartModal');
+    buildAdminParticipants();
+    buildAdminTablaComparativa();
+  }catch(ex){errEl.style.display='block';errEl.textContent='⚠ Error al guardar: '+ex.message;}
+}
+
+async function eliminarParticipante(id){
+  if(!confirm('¿Eliminar este participante? Sus pronósticos se perderán.')) return;
+  try{
+    const p=Object.values(FB_PARTICIPANTS).find(p=>p.id===id);
+    if(!p) return;
+    await fbDelete('participants', p.correo);
+    delete FB_PARTICIPANTS[p.correo];
+    buildAdminParticipants();
+    buildAdminTablaComparativa();
+    buildAdminPronósticos();
+    buildAdminPosiciones();
+    showToast('🗑 Participante eliminado');
+  }catch(ex){showToast('⚠ Error al eliminar.');}
+}
+
+async function cambiarPago(id, campo, valor){
+  try{
+    const p=Object.values(FB_PARTICIPANTS).find(p=>p.id===id);
+    if(!p) return;
+    const update={[campo]:valor};
+    await fbSet('participants', p.correo, update);
+    FB_PARTICIPANTS[p.correo]={...FB_PARTICIPANTS[p.correo],...update};
+    buildAdminParticipants();
+    showToast('✅ Pago actualizado');
+  }catch(ex){showToast('⚠ Error.');}
+}
+
+function buildAdminParticipants(){
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const results=FB_RESULTS;
+    const realEsp=FB_REAL_ESP;
+    document.getElementById('adminTotalPart').textContent=parts.length+' registrado'+(parts.length!==1?'s':'');
+
+    const pagados=parts.filter(p=>p.monto>0).length;
+    const pendientes=parts.filter(p=>!p.monto||p.monto<=0).length;
+    const resEl=document.getElementById('adminPagoResumen');
+    if(resEl) resEl.innerHTML=`<span style="color:var(--green)">✅ ${pagados} pagados</span> · <span style="color:var(--gold)">⏳ ${pendientes} pendientes</span>`;
+
+    const ranked=parts.map(p=>{
+      const s=calcularPuntosParticipante(p,results,realEsp);
+      return{...p,...s};
+    }).sort((a,b)=>b.pts-a.pts||b.exactos-a.exactos);
+
+    const pagoColor=(monto,fecha)=>monto>0?'var(--green)':'var(--gold)';
+    const pagoLabel=(monto,fecha)=>{
+      if(monto>0){
+        const d=fecha?new Date(fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):'';
+        return `✅ $${monto.toFixed(2)}${d?' · '+d:''}`;
+      }
+      return '⏳ Sin pago registrado';
+    };
+
+    let html='';
+    ranked.forEach((p,i)=>{
+      const lastUpd=p.lastUpdate?new Date(p.lastUpdate).toLocaleString('es-MX',{dateStyle:'short',timeStyle:'short'}):'—';
+      const pronCount=Object.keys(p.pronosticos||{}).filter(mn=>{const pr=(p.pronosticos||{})[mn];return pr&&pr.h!==''&&pr.h!==null&&pr.a!==''&&pr.a!==null;}).length;
+      const rankIcon=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+      const monto=p.monto||0;
+      const fecha=p.fechaPago||'';
+      html+=`<div class="participant-row" style="flex-wrap:wrap;gap:0.5rem">
+        <div style="flex:1;min-width:0">
+          <div class="p-name">${rankIcon} ${i+1}. ${escHtml(p.fullName||p.nombre+' '+(p.apellido||''))}</div>
+          <div class="p-email">${escHtml(p.correo||'')} · ${escHtml(p.celular||'')}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:800;color:var(--gold2);letter-spacing:2px;background:rgba(212,168,0,0.1);padding:1px 7px;border-radius:4px;border:1px solid rgba(212,168,0,0.25)">${escHtml(p.codigoAcceso||'—')}</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;color:${pagoColor(monto,fecha)}">${pagoLabel(monto,fecha)}</span>
+            <span style="font-size:0.62rem;color:var(--faint)">· ${pronCount}/72 pronósticos · Act: ${lastUpd}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold)">${p.pts||0} pts</div>
+          <div style="font-size:0.65rem;color:var(--muted)">✓${p.exactos||0} exactos · ✓${p.correctos||0} correctos</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;margin-top:2px">
+            <button class="btn btn-dark" style="font-size:0.6rem;padding:0.2rem 0.5rem" onclick="abrirModalEditarPart('${p.id}')">✏️ Editar</button>
+            <button class="btn btn-red" style="font-size:0.6rem;padding:0.2rem 0.5rem" onclick="eliminarParticipante('${p.id}')">🗑</button>
+          </div>
+        </div>
+      </div>`;
+    });
+    document.getElementById('adminParticipantsList').innerHTML=html||'<div style="padding:1rem;color:var(--muted);text-align:center;font-size:0.8rem">Sin participantes aún. Usa el botón "➕ Agregar Participante".</div>';
+  }catch(ex){}
+}
+
+function buildAdminTablaComparativa(){
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const results=FB_RESULTS;
+
+    // Obtener todos los partidos con resultado real
+    const matchesConResultado=Object.keys(results).filter(mn=>{
+      const r=results[mn];
+      return r.h!==''&&r.h!==null&&r.h!==undefined&&r.a!==''&&r.a!==null&&r.a!==undefined;
+    });
+
+    if(!matchesConResultado.length){
+      document.getElementById('adminTablaComparativa').innerHTML='<div style="color:var(--muted);padding:1.5rem;text-align:center;font-size:0.82rem">Carga resultados reales para ver la comparativa.</div>';
+      return;
+    }
+
+    const ranked=parts.map(p=>{
+      const realEsp=FB_REAL_ESP;
+      const score=calcularPuntosParticipante(p,results,realEsp);
+      return{...p,...score};
+    }).sort((a,b)=>b.pts-a.pts||b.exactos-a.exactos);
+
+    // Cabecera con partidos
+    let thMatches='';
+    matchesConResultado.forEach(mn=>{
+      const m=MATCH_MAP[mn];
+      if(!m) return;
+      thMatches+=`<th title="${m.teamH.n} vs ${m.teamA.n}"><div class="match-label">${mn}</div><div class="real-score">${results[mn].h}:${results[mn].a}</div></th>`;
+    });
+
+    let rows='';
+    ranked.forEach((p,i)=>{
+      const pron=p.pronosticos||{};
+      let cells='';
+      matchesConResultado.forEach(mn=>{
+        const pr=pron[mn]||{h:'',a:''};
+        const r=results[mn];
+        const res=calcularPuntosMN(pr.h,pr.a,r.h,r.a);
+        const hasPron=pr.h!==''&&pr.h!==null&&pr.h!==undefined&&pr.a!==''&&pr.a!==null&&pr.a!==undefined;
+        let cls='cell-missing';let txt='–';
+        if(hasPron){
+          txt=pr.h+':'+pr.a;
+          if(res.tipo==='exact') cls='cell-exact';
+          else if(res.tipo==='correct') cls='cell-correct';
+          else cls='cell-wrong';
+        }
+        cells+=`<td class="${cls}">${txt}</td>`;
+      });
+      rows+=`<tr>
+        <td>${i+1}. ${escHtml(p.fullName||p.nombre)}</td>
+        ${cells}
+        <td style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--gold)">${p.pts||0}</td>
+      </tr>`;
+    });
+
+    document.getElementById('adminTablaComparativa').innerHTML=`
+      <table class="compare-tbl">
+        <thead><tr><th>Participante</th>${thMatches}<th>TOTAL</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }catch(ex){console.error(ex);}
+}
+
+function exportarDatosAdmin(){
+  try{
+    const parts=Object.values(FB_PARTICIPANTS);
+    const results=FB_RESULTS;
+    const realEsp=FB_REAL_ESP;
+
+    const matchList=Object.keys(MATCH_MAP).sort();
+    const header=['#','Nombre','Apellido','Correo','Celular','Monto Pagado','Fecha Pago','Pts Total','Exactos','Correctos','Campeón Pick','Subcampeón Pick','Goleador Pick'];
+    matchList.forEach(mn=>{
+      const m=MATCH_MAP[mn];
+      if(m) header.push(`${mn} (${m.teamH.n} vs ${m.teamA.n})`);
+    });
+
+    const ranked=parts.map(p=>{
+      const score=calcularPuntosParticipante(p,results,realEsp);
+      return{...p,...score};
+    }).sort((a,b)=>b.pts-a.pts||b.exactos-a.exactos);
+
+    const rows=[header];
+    ranked.forEach((p,i)=>{
+      const pron=p.pronosticos||{};
+      const esp=p.especiales||{};
+      const row=[i+1,p.nombre||'',p.apellido||'',p.correo||'',p.celular||'',p.monto||0,p.fechaPago||'',p.pts||0,p.exactos||0,p.correctos||0,esp.campeon||'',esp.subcampeon||'',esp.goleador||''];
+      matchList.forEach(mn=>{
+        const pr=pron[mn]||{h:'',a:''};
+        row.push((pr.h!==''&&pr.h!==null&&pr.h!==undefined?pr.h:'')+':'+(pr.a!==''&&pr.a!==null&&pr.a!==undefined?pr.a:''));
+      });
+      rows.push(row);
+    });
+
+    // Agregar fila de resultados reales
+    const realRow=['REAL','','','','','','','','','',''];
+    matchList.forEach(mn=>{
+      const r=results[mn]||{h:'',a:''};
+      realRow.push((r.h!==''&&r.h!==null&&r.h!==undefined?r.h:'')+':'+(r.a!==''&&r.a!==null&&r.a!==undefined?r.a:''));
+    });
+    rows.push([]);
+    rows.push(['--- RESULTADOS REALES ---']);
+    rows.push(realRow);
+    rows.push(['','Campeón:',realEsp.campeon||'','Subcampeón:',realEsp.subcampeon||'','Goleador:',realEsp.goleador||'']);
+
+    const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download='Admin_Quiniela_Mundial_2026_completo.csv';a.click();
+    showToast('⬇ Exportación completa descargada');
+  }catch(ex){showToast('Error al exportar');}
+}
+
+/* ══════════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════════ */
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function escHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Cerrar modales con click fuera
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+});
+</script>
+
+<!-- MÚSICA DE FONDO -->
+<script>
+(function(){
+  let ctx, playing=false, nodes=[], startTime=0, scheduleAhead=0.12, tempo=118;
+  const beat=60/tempo;
+
+  /* ── PALETA DE NOTAS (escala mayor, Do) ── */
+  const C3=130.8,D3=146.8,E3=164.8,F3=174.6,G3=196,A3=220,B3=246.9;
+  const C4=261.6,D4=293.7,E4=329.6,F4=349.2,G4=392,A4=440,B4=493.9;
+  const C5=523.3,D5=587.3,E5=659.3,G5=784;
+
+  /* ── PATRONES RÍTMICOS LATINOS ── */
+  // Clave 3-2 (son cubano): beats en 16avos donde suena
+  const clave32=[1,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0];
+
+  // Melodía festiva (notas + duración en beats)
+  const melody=[
+    [G4,0.5],[E4,0.5],[C4,0.5],[D4,0.5],
+    [E4,0.5],[G4,0.5],[A4,1],
+    [A4,0.5],[G4,0.5],[E4,0.5],[F4,0.5],
+    [G4,1],[G4,0.5],[G4,0.5],
+    [C5,0.5],[B4,0.5],[A4,0.5],[G4,0.5],
+    [A4,0.5],[G4,0.5],[E4,1],
+    [F4,0.5],[E4,0.5],[D4,0.5],[C4,0.5],
+    [E4,1],[C4,1]
+  ];
+
+  // Bajo (tumbao)
+  const bass=[
+    [C3,1],[G3,0.5],[C3,0.5],
+    [F3,1],[C3,0.5],[G3,0.5],
+    [A3,1],[E3,0.5],[A3,0.5],
+    [G3,1],[D3,0.5],[G3,0.5]
+  ];
+
+  function init(){
+    ctx=new(window.AudioContext||window.webkitAudioContext)();
+  }
+
+  function osc(freq,start,dur,vol,type='sine',detune=0){
+    const o=ctx.createOscillator();
+    const g=ctx.createGain();
+    const comp=ctx.createDynamicsCompressor();
+    o.type=type;
+    o.frequency.value=freq;
+    o.detune.value=detune;
+    g.gain.setValueAtTime(0,start);
+    g.gain.linearRampToValueAtTime(vol,start+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,start+dur*0.9);
+    o.connect(g);g.connect(comp);comp.connect(ctx.destination);
+    o.start(start);o.stop(start+dur);
+    nodes.push(o);
+  }
+
+  function noise(start,dur,vol,freq){
+    // Simular percusión con osciladores
+    osc(freq||200,start,dur*0.05,vol,'square');
+    osc(freq?freq*1.5:300,start,dur*0.03,vol*0.5,'sawtooth');
+  }
+
+  function scheduleBar(barStart){
+    const sixteenth=beat/4;
+
+    // ── CLAVE (maracas / clave) ──
+    clave32.forEach((on,i)=>{
+      if(on) noise(barStart+i*sixteenth,0.08,0.18,800+Math.random()*200);
+    });
+
+    // ── KICK en tiempo 1 y 3 ──
+    [0,2].forEach(b=>{
+      osc(60,barStart+b*beat,0.25,0.5,'sine');
+      osc(80,barStart+b*beat,0.1,0.3,'sine');
+    });
+
+    // ── SNARE en tiempo 2 y 4 ──
+    [1,3].forEach(b=>{
+      noise(barStart+b*beat,0.1,0.25,200);
+      noise(barStart+b*beat,0.08,0.15,400);
+    });
+
+    // ── HI-HAT en corcheas ──
+    for(let i=0;i<8;i++){
+      noise(barStart+i*(beat/2),0.05,0.08+(i%2===0?0.04:0),1200+Math.random()*300);
+    }
+  }
+
+  function scheduleMelody(barStart,barIndex){
+    let t=barStart;
+    const chunk=melody.slice((barIndex%4)*8,(barIndex%4)*8+8);
+    chunk.forEach(([freq,dur])=>{
+      osc(freq,t,dur*beat*0.85,0.12,'sine',5);
+      osc(freq*2,t,dur*beat*0.6,0.04,'sine',-5); // octava arriba
+      t+=dur*beat;
+    });
+  }
+
+  function scheduleBass(barStart,barIndex){
+    let t=barStart;
+    const chunk=bass.slice((barIndex%4)*4,(barIndex%4)*4+4);
+    chunk.forEach(([freq,dur])=>{
+      osc(freq,t,dur*beat*0.8,0.18,'triangle');
+      t+=dur*beat;
+    });
+  }
+
+  let barIndex=0, nextBarTime=0;
+
+  function scheduler(){
+    if(!playing) return;
+    while(nextBarTime < ctx.currentTime + scheduleAhead*8){
+      scheduleBar(nextBarTime);
+      scheduleMelody(nextBarTime,barIndex);
+      scheduleBass(nextBarTime,barIndex);
+      nextBarTime+=beat*4;
+      barIndex++;
+    }
+    setTimeout(scheduler,100);
+  }
+
+  function start(){
+    if(!ctx) init();
+    if(ctx.state==='suspended') ctx.resume();
+    playing=true;
+    nextBarTime=ctx.currentTime+0.1;
+    scheduler();
+    updateBtn();
+  }
+
+  function stop(){
+    playing=false;
+    nodes.forEach(n=>{try{n.stop();}catch(e){}});
+    nodes=[];
+    if(ctx) ctx.suspend();
+    updateBtn();
+  }
+
+  function toggle(){
+    playing?stop():start();
+  }
+
+  function updateBtn(){
+    const btn=document.getElementById('musicBtn');
+    if(!btn) return;
+    btn.textContent=playing?'🔊':'🔇';
+    btn.title=playing?'Pausar música':'Reanudar música';
+  }
+
+  /* ── BOTÓN FLOTANTE ── */
+  const btn=document.createElement('button');
+  btn.id='musicBtn';
+  btn.textContent='🔊';
+  btn.title='Pausar música';
+  btn.onclick=toggle;
+  btn.style.cssText=[
+    'position:fixed','bottom:5rem','right:1.2rem','z-index:8888',
+    'width:42px','height:42px','border-radius:50%','border:none',
+    'background:var(--gold2)','color:#fff','font-size:1.1rem',
+    'cursor:pointer','box-shadow:0 3px 12px rgba(0,0,0,0.2)',
+    'transition:transform 0.15s,filter 0.15s',
+    'display:flex','align-items:center','justify-content:center'
+  ].join(';');
+  btn.onmouseenter=()=>btn.style.filter='brightness(0.88)';
+  btn.onmouseleave=()=>btn.style.filter='';
+  document.body.appendChild(btn);
+
+  /* ── AUTOSTART al primer click/tap del usuario (política del navegador) ── */
+  function tryAutoStart(){
+    start();
+    document.removeEventListener('click',tryAutoStart);
+    document.removeEventListener('keydown',tryAutoStart);
+    document.removeEventListener('touchstart',tryAutoStart);
+  }
+
+  // Intentar arrancar directamente; si el navegador lo bloquea, esperar interacción
+  try{
+    init();
+    ctx.resume().then(()=>{
+      if(ctx.state==='running'){
+        playing=true;
+        nextBarTime=ctx.currentTime+0.1;
+        scheduler();
+        updateBtn();
+      } else {
+        document.addEventListener('click',tryAutoStart,{once:true});
+        document.addEventListener('keydown',tryAutoStart,{once:true});
+        document.addEventListener('touchstart',tryAutoStart,{once:true});
+      }
+    });
+  }catch(e){
+    document.addEventListener('click',tryAutoStart,{once:true});
+  }
+})();
+</script>
+
+<!-- fin -->
+</body>
+</html>
